@@ -4,10 +4,8 @@ __pycache__/
 .venv/
 venv/
 
-# Generated report output and scratch scenarios
+# Generated report output and scratch scenarios live under build/
 build/
-*.html
-!*/templates/*.html
 
 # OS / editor
 .DS_Store

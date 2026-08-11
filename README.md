@@ -1,15 +1,28 @@
 # SDEC demand and capacity model
 
 A Python implementation of the **Medical SDEC (Same Day Emergency Care) demand
-and capacity model**. It reads its inputs from a JSON config and writes a
-self-contained HTML report that opens in a browser with a double-click — no
-server, no build step, no JavaScript reimplementation of the maths.
+and capacity model**, plus a standalone **interactive tool**. Inputs live in a
+single JSON config; the calculation logic is a faithful port of the browser-based
+*Medical SDEC Demand and Capacity Tool*, and the JSON follows the same structural
+conventions as the trust's ED workforce model JSON (`meta` / `areas` / `demand` /
+`capacity` / `standards` / `future`).
 
-The calculation logic is a faithful port of the browser-based *Medical SDEC
-Demand and Capacity Tool* (an HTML file with embedded JavaScript). The JSON
-config follows the same structural conventions as the trust's ED workforce
-model JSON (`meta` / `areas` / `demand` / `capacity` / `standards` / `future`),
-so the two models read alike.
+## Which file do I open?
+
+There are two deliverables, both self-contained HTML (double-click to open, no
+server, no internet) — pick by what you need:
+
+| I want to… | Open / share | Built by |
+|---|---|---|
+| **Edit inputs live** — sliders, editable staffing, toggle levers, and see the numbers update | **`interactive/sdec_interactive.html`** | `python -m scripts.build_interactive` |
+| **Share a fixed snapshot / report** of one scenario | `build/sdec_report.html` (or wherever you output it) | `python -m scripts.build_report …` |
+
+Both are driven by the **same `data/sdec_model.json`**. The interactive tool can
+**Load JSON** and **Download JSON** in that exact schema, so you can edit in the
+browser, download the config, and the Python report/engine reads the very same
+file — and vice-versa. The interactive tool runs the maths in the browser (it has
+to, to be a serverless live editor); that in-browser maths is the code the test
+suite pins against the Python engine, so the two stay numerically identical.
 
 ## What it computes
 
@@ -38,14 +51,21 @@ sdec_model/
   __init__.py
   schema.py         # load + validate + normalise sdec_model.json
   engine.py         # the ported calculation logic
-  report.py         # builds the self-contained HTML report
+  report.py         # builds the self-contained static HTML report
 data/
-  sdec_model.json   # seeded default config (the tool's demo data)
+  sdec_model.json   # seeded default config (the tool's demo data) — source of truth
 scripts/
-  build_report.py   # CLI: JSON in, HTML report out
+  build_report.py       # CLI: JSON in, static HTML report out
+  build_interactive.py  # CLI: JSON in, standalone interactive tool out
+interactive/
+  base_tool.html        # the original browser tool (UI + in-browser engine)
+  config_bridge.js      # JSON<->tool-state converters + Load/Download JSON wiring
+  sdec_interactive.html # BUILT deliverable: the live editor, seeded from the JSON
 tests/
-  test_engine.py    # pytest suite (incl. JS-parity check)
+  test_engine.py    # engine pytest suite (incl. JS-parity check)
+  test_interactive.py   # interactive build + bridge tests
   js_reference.js   # the original JavaScript, run by node as a parity oracle
+  bridge_check.js   # config<->state round-trip + seed check (node)
   fixtures/
     js_reference.json  # committed oracle output (so tests run without node)
 ```
@@ -54,14 +74,23 @@ tests/
 
 The runtime has **no third-party dependencies** (standard library only).
 
-Generate the report from the seeded config:
+Build the **interactive tool** (the live editor) from the config:
 
 ```bash
-python -m scripts.build_report data/sdec_model.json sdec_report.html
-# or:  python scripts/build_report.py data/sdec_model.json sdec_report.html
+python -m scripts.build_interactive
+# -> interactive/sdec_interactive.html  (open / share this)
 ```
 
-Then open `sdec_report.html` in any browser.
+Generate the **static report** from the config:
+
+```bash
+python -m scripts.build_report data/sdec_model.json build/sdec_report.html
+# or:  python scripts/build_report.py data/sdec_model.json build/sdec_report.html
+```
+
+Then open the resulting `.html` in any browser. After editing
+`data/sdec_model.json`, rerun the relevant build to refresh the HTML (a test
+guards against the committed interactive tool drifting out of sync with the JSON).
 
 ### Modelling a future scenario
 
