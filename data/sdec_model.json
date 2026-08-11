@@ -1,0 +1,434 @@
+{
+  "meta": {
+    "schemaVersion": 1,
+    "name": "Medical SDEC demand and capacity model",
+    "organisation": "East and North Hertfordshire NHS Trust",
+    "savedAt": "2026-08-11T00:00:00.000Z",
+    "isSyntheticDemoData": true,
+    "disclosureMode": "standard",
+    "notes": "Seeded from the 'Medical SDEC Demand and Capacity Tool' demo data (SDEC activity export, Apr-Jul 2026, Lister). Values are illustrative placeholders, not confirmed local figures - see the Data to Confirm section in the README."
+  },
+  "areas": [
+    {
+      "id": "sdec",
+      "name": "Medical SDEC",
+      "order": 0,
+      "active": true,
+      "physicalSpaces": 21,
+      "acuityWeight": 1,
+      "notes": "Single SDEC unit (not multiple physical zones). physicalSpaces = the funded 'chairs' ceiling (21 in the seed). This footprint is documented but not currently wired into the pressure calculations, mirroring the source tool; confirm the physical footprint locally."
+    }
+  ],
+  "assumptions": {
+    "operatingWindow": {
+      "openHour": 7,
+      "closeHour": 24,
+      "notes": "SDEC operating window (07:00-24:00 in the seed). Demand and capacity are zeroed outside this window."
+    },
+    "defaultNurseRatio": 4,
+    "defaultCostMedWtePerYear": 110000,
+    "defaultCostNurWtePerYear": 42000,
+    "notes": "SDEC-specific planning scalars kept out of standards.staffingRules (which is a different, rule-type concept). defaultNurseRatio is the fallback patients-per-nurse used for a nursing bay line that has no explicit patientsPerHour. The two default cost-per-WTE values are fallbacks used only when a capacity line has no explicit costPerWtePerYear. Patients-per-nurse ~1:4 is a common SDEC/AMU planning value - confirm with the nursing lead."
+  },
+  "demand": {
+    "method": "occupancyDeconvolution",
+    "meanLosSource": "losProfiles",
+    "areas": [
+      {
+        "areaId": "sdec",
+        "patientsPresentOverride": {
+          "weekday": [0, 0, 0, 0, 0, 0, 0, 0.69, 0.69, 5.73, 12.05, 16.09, 18.16, 20.03, 20.95, 21.26, 20.83, 18.99, 16.98, 14.52, 10.95, 7.57, 4.91, 3.09],
+          "weekend": [0, 0, 0, 0, 0, 0, 0, 0.65, 0.65, 3.32, 6.68, 8.85, 10.15, 11.12, 11.29, 10.71, 10.76, 9.24, 7.74, 6.24, 4.21, 2.29, 1.35, 0.91]
+        },
+        "arrivals": {
+          "weekday": [],
+          "weekend": []
+        },
+        "notes": "Average patients PRESENT in SDEC by clock hour (index = hour of day), from the activity export. This is the primary raw input for SDEC (the reverse of the ED model's arrivals->occupancy direction): arrivals are derived at runtime by deconvolving occupancy against a box-car length of stay, so the arrivals arrays are intentionally left empty."
+      }
+    ],
+    "sources": {
+      "edPull": 14.2,
+      "gp": 8.0,
+      "followup": 9.9,
+      "oneoneone": 0.1,
+      "hotClinic": 5.0,
+      "notes": "Referral-source volumes in patients/day from the monthly audit: ED pull ~38%, follow-up ~27%, GP ~22%, hot clinics ~14%, 111 <1%. These are used only in the future state to rescale the day when future.sourceMultipliers change; the current state works off the patientsPresentOverride profile directly."
+    },
+    "losProfiles": [
+      {
+        "areaId": "sdec",
+        "source": "averageLos",
+        "averageLosHours": 5.0,
+        "bands": [],
+        "remainingCurve": [],
+        "synthetic": true,
+        "notes": "SDEC uses one blended mean length of stay (box-car), not banded distributions. ~5.0h is data-implied (~213 patient-hours/day weekday / ~42.8 attendances). Confirm mean and distribution by referral source from SDEC actuals."
+      }
+    ],
+    "daysPerYear": {
+      "weekday": 261,
+      "weekend": 104
+    }
+  },
+  "capacity": {
+    "lines": [
+      {
+        "id": "med-consultant",
+        "name": "Consultant",
+        "profession": "medical",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 1.0,
+        "costPerWtePerYear": 110000,
+        "startHour": 8.5,
+        "endHour": 16.5,
+        "dayPattern": "everyDay",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "med-long-day-registrar",
+        "name": "Long Day Registrar",
+        "profession": "medical",
+        "areaIds": ["sdec"],
+        "wte": 2,
+        "patientsPerHour": 0.67,
+        "costPerWtePerYear": 110000,
+        "startHour": 8.5,
+        "endHour": 21,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "med-long-day-gp",
+        "name": "Long Day GP",
+        "profession": "medical",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 0.5,
+        "costPerWtePerYear": 110000,
+        "startHour": 8.5,
+        "endHour": 20,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "med-twilight-imt",
+        "name": "Twilight IMT",
+        "profession": "medical",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 0.6,
+        "costPerWtePerYear": 110000,
+        "startHour": 13,
+        "endHour": 22,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "med-sho",
+        "name": "SHO (assumed rate)",
+        "profession": "medical",
+        "areaIds": ["sdec"],
+        "wte": 3,
+        "patientsPerHour": 0.5,
+        "costPerWtePerYear": 110000,
+        "startHour": 8.5,
+        "endHour": 17,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": true,
+        "active": true,
+        "notes": "SHO patients-per-hour rate is an assumption within the 0.5-1/hr envelope; confirm from job plans."
+      },
+      {
+        "id": "med-registrar-weekend",
+        "name": "Registrar (weekend)",
+        "profession": "medical",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 0.67,
+        "costPerWtePerYear": 110000,
+        "startHour": 9,
+        "endHour": 21,
+        "dayPattern": "weekend",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "med-sho-weekend",
+        "name": "SHO (weekend)",
+        "profession": "medical",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 0.5,
+        "costPerWtePerYear": 110000,
+        "startHour": 9,
+        "endHour": 17,
+        "dayPattern": "weekend",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "nur-b7-nic",
+        "name": "B7 NIC (co-ordinator)",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "everyDay",
+        "countsTowardsProfessionCapacity": false,
+        "active": true,
+        "notes": "Fixed co-ordinator role on the floor; does not carry patients, so it adds no nursing concurrency capacity (bay = false)."
+      },
+      {
+        "id": "nur-b6-hello",
+        "name": "B6 Hello Nurse",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "everyDay",
+        "countsTowardsProfessionCapacity": false,
+        "active": true
+      },
+      {
+        "id": "nur-b6-inreach",
+        "name": "B6 In-reach Nurse",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "everyDay",
+        "countsTowardsProfessionCapacity": false,
+        "active": true
+      },
+      {
+        "id": "nur-triage",
+        "name": "Triage Nurse",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": false,
+        "active": true
+      },
+      {
+        "id": "nur-bay-b6-nic",
+        "name": "Bay - B6 NIC",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": true,
+        "active": true,
+        "notes": "Bay line: carries patients and adds nursing concurrency capacity at patientsPerHour patients per nurse."
+      },
+      {
+        "id": "nur-bay-b5",
+        "name": "Bay - B5 nurses",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 3,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "nur-bay-weekend",
+        "name": "Bay nurses (weekend)",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 2,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekend",
+        "countsTowardsProfessionCapacity": true,
+        "active": true
+      },
+      {
+        "id": "nur-emt-darting",
+        "name": "EMT (darting/float)",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 3,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": false,
+        "active": true
+      },
+      {
+        "id": "nur-emt-weekend",
+        "name": "EMT (weekend)",
+        "profession": "nursing",
+        "areaIds": ["sdec"],
+        "wte": 1,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekend",
+        "countsTowardsProfessionCapacity": false,
+        "active": true
+      }
+    ],
+    "productivity": [
+      {
+        "profession": "medical",
+        "method": "placeholder",
+        "annualContractedHoursPerWte": 1950,
+        "annualLeaveHours": 240,
+        "sicknessAndOtherAbsenceHours": 60,
+        "studyAndTrainingHours": 90,
+        "nonClinicalHours": 390,
+        "outOfDepartmentHours": 0,
+        "aggregateHeadroom": 0.32,
+        "productiveMinutesPerStaffHour": 45,
+        "notes": "PLACEHOLDER for schema consistency with the ED model. The source SDEC tool works off raw WTE x rate with no leave/sickness/headroom adjustment, so this section is NOT wired into the engine."
+      },
+      {
+        "profession": "nursing",
+        "method": "placeholder",
+        "annualContractedHoursPerWte": 1955,
+        "annualLeaveHours": 250,
+        "sicknessAndOtherAbsenceHours": 90,
+        "studyAndTrainingHours": 60,
+        "nonClinicalHours": 60,
+        "outOfDepartmentHours": 0,
+        "aggregateHeadroom": 0.23,
+        "productiveMinutesPerStaffHour": 48,
+        "notes": "PLACEHOLDER - see the medical productivity note. Not wired into the engine."
+      }
+    ]
+  },
+  "standards": {
+    "staffingRules": [],
+    "benchmarks": [],
+    "notes": "The source SDEC tool encodes no staffing rules or benchmarks. This section is intentionally empty (rather than seeded with invented NHS ratios) and is not wired into the engine; it is kept for schema parity with the ED model."
+  },
+  "future": {
+    "demandMultiplier": 1.0,
+    "losMultiplier": 1.0,
+    "c4cPercent": 0,
+    "sourceMultipliers": {
+      "edPull": 1,
+      "gp": 1,
+      "followup": 1,
+      "oneoneone": 1,
+      "hotClinic": 1
+    },
+    "customCapacityLines": {
+      "medical": [],
+      "nursing": []
+    },
+    "schemes": [
+      {
+        "id": "ext-cons",
+        "name": "Extend Consultant to 20:00",
+        "type": "capacityAddition",
+        "profession": "medical",
+        "enabled": false,
+        "areaIds": ["sdec"],
+        "note": "Senior decision-maker on the floor into the evening peak",
+        "add": [
+          {
+            "label": "Consultant - evening",
+            "wte": 1,
+            "patientsPerHour": 1.0,
+            "startHour": 16.5,
+            "endHour": 20,
+            "dayPattern": "everyDay"
+          }
+        ]
+      },
+      {
+        "id": "twilight-dr",
+        "name": "Add Twilight Doctor 14:00-24:00",
+        "type": "capacityAddition",
+        "profession": "medical",
+        "enabled": false,
+        "areaIds": ["sdec"],
+        "note": "Covers the late arrivals tail so the queue clears before close",
+        "add": [
+          {
+            "label": "Twilight doctor",
+            "wte": 1,
+            "patientsPerHour": 0.6,
+            "startHour": 14,
+            "endHour": 0,
+            "dayPattern": "everyDay"
+          }
+        ]
+      },
+      {
+        "id": "extra-bay",
+        "name": "Add a Bay Nurse (Day)",
+        "type": "capacityAddition",
+        "profession": "nursing",
+        "enabled": false,
+        "areaIds": ["sdec"],
+        "note": "One more registered nurse in the bays, 08:00-20:30",
+        "add": [
+          {
+            "label": "Extra bay nurse",
+            "wte": 1,
+            "patientsPerHour": 4,
+            "startHour": 8,
+            "endHour": 20.5,
+            "dayPattern": "everyDay",
+            "countsTowardsProfessionCapacity": true
+          }
+        ]
+      },
+      {
+        "id": "wknd-uplift",
+        "name": "Weekend Medical Uplift",
+        "type": "capacityAddition",
+        "profession": "medical",
+        "enabled": false,
+        "areaIds": ["sdec"],
+        "note": "Second weekend clinician to match weekday cover shape",
+        "add": [
+          {
+            "label": "Weekend clinician",
+            "wte": 1,
+            "patientsPerHour": 0.6,
+            "startHour": 10,
+            "endHour": 20,
+            "dayPattern": "weekend"
+          }
+        ]
+      }
+    ],
+    "notes": "Future-state levers from the source tool. Each preset lever is a scheme with type 'capacityAddition' and its add[] lines; enable a scheme by setting enabled:true. The scalar dials (demandMultiplier, losMultiplier, c4cPercent, sourceMultipliers) rescale demand. NOTE the source's deliberate asymmetry: c4cPercent (Care Closer to Home diversion) reduces patients-present but NOT arrivals. An add line whose endHour equals 0 means midnight-as-overnight-wrap (e.g. Twilight doctor 14:00-00:00), matching the source's parsing of '00:00'. customCapacityLines carry the net change (wte - baseWte) of any pulled-in and edited baseline lines; empty in the seed."
+  }
+}

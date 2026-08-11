@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Generated report output and scratch scenarios
+build/
+*.html
+!*/templates/*.html
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
