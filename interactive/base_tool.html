@@ -32,6 +32,9 @@
     --wf4: #86b6ef;  /* substantive */
     --wf-total: #0d366b;
     --page-future: #eaf2fc; /* subtle future-state background tint */
+    --violet: #6c4bd8;         /* physical-space constraint (status strip) */
+    /* per-area series palette (Bay 1, Bay 2, chairs, hot clinic, darting, triage) */
+    --a1: #2a78d6; --a2: #1baf7a; --a3: #c2661d; --a4: #6c4bd8; --a5: #0e8f9a; --a6: #9c3d7a;
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
@@ -58,6 +61,8 @@
       --wf4: #1c5cab;
       --wf-total: #cde2fb;
       --page-future: #10202f;
+      --violet: #a58ef7;
+      --a1: #3987e5; --a2: #199e70; --a3: #e2984f; --a4: #a58ef7; --a5: #2bc0cf; --a6: #d878ae;
     }
   }
   :root[data-theme="dark"] {
@@ -84,6 +89,8 @@
     --wf4: #1c5cab;
     --wf-total: #cde2fb;
     --page-future: #10202f;
+    --violet: #a58ef7;
+    --a1: #3987e5; --a2: #199e70; --a3: #e2984f; --a4: #a58ef7; --a5: #2bc0cf; --a6: #d878ae;
   }
   :root[data-theme="light"] {
     color-scheme: light;
@@ -109,6 +116,8 @@
     --wf4: #86b6ef;
     --wf-total: #0d366b;
     --page-future: #eaf2fc;
+    --violet: #6c4bd8;
+    --a1: #2a78d6; --a2: #1baf7a; --a3: #c2661d; --a4: #6c4bd8; --a5: #0e8f9a; --a6: #9c3d7a;
   }
 
   * { box-sizing: border-box; }
@@ -180,6 +189,7 @@
   .cols-3 { grid-template-columns: repeat(3, 1fr); }
   .cols-2 { grid-template-columns: repeat(2, 1fr); }
   .cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .cols-auto { grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); }
   @media (max-width: 860px) { .cols-4, .cols-3, .cols-5 { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 560px) { .cols-4, .cols-3, .cols-2, .cols-5 { grid-template-columns: 1fr; } }
 
@@ -260,10 +270,47 @@
   .status-within  { background: var(--good); }
   .status-medical { background: var(--accent); }
   .status-nursing { background: var(--bad-2); }
-  .status-both    { background: var(--bad); }
+  .status-space   { background: var(--violet); }
+  .status-multi   { background: var(--bad); }
   .status-closed  { background: var(--chip-bg); color: var(--ink-2); }
   ul.interpretation-list { padding-left: 20px; margin: 8px 0 0; }
   ul.interpretation-list li { margin-bottom: 6px; }
+
+  /* ---------- per-area small multiples: area rows x hour columns ---------- */
+  .area-matrix { border-collapse: separate; border-spacing: 2px; font-size: 11px; width: auto; min-width: 100%; }
+  .area-matrix th { font-size: 11px; color: var(--muted); font-weight: 600; text-align: center; padding: 2px 4px; white-space: nowrap; border: none; text-transform: none; letter-spacing: 0; }
+  .area-matrix th[scope="row"] { text-align: left; color: var(--ink); padding-right: 12px; position: sticky; left: 0; background: var(--surface); z-index: 1; }
+  .area-matrix td { padding: 0; border: none; }
+  .area-matrix .mx {
+    min-width: 28px; height: 28px; border-radius: 4px; text-align: center; color: #ffffff;
+    font-size: 9px; font-weight: 700; cursor: default;
+  }
+  .area-matrix .mx:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .mx-within { background: var(--good); }
+  .mx-medical { background: var(--accent); }
+  .mx-nursing { background: var(--bad-2); }
+  .mx-space { background: var(--violet); }
+  .mx-multi { background: var(--bad); }
+  .mx-closed { background: var(--chip-bg); color: var(--ink-2); }
+  /* an area with no demand entered is NOT "within capacity" - it is unmodelled.
+     Never let it read as reassuring green. */
+  .mx-nodata { background: repeating-linear-gradient(45deg, var(--chip-bg), var(--chip-bg) 4px, var(--grid) 4px, var(--grid) 8px); color: var(--ink-2); }
+  .area-flag { font-size: 10.5px; font-weight: 400; color: var(--muted); white-space: nowrap; }
+
+  /* ---------- area cards (Step 1) ---------- */
+  .area-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+  .area-spaces { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .area-note { font-size: 12.5px; color: var(--ink-2); max-width: 74ch; margin: 2px 0 10px; }
+  .space-fields { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 18px; margin-bottom: 6px; }
+  .space-fields .field input[type=number] { width: 78px; }
+  .roster-sub { font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 4px; }
+  .placeholder-tag {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--bad-2); border: 1px solid var(--bad-2); border-radius: 999px; padding: 1px 7px;
+  }
+  .demand-matrix input[type=number] { width: 62px; }
+  .demand-matrix td, .demand-matrix th { padding: 3px 4px; }
+  .demand-matrix tr.total td, .demand-matrix tr.total th { font-weight: 650; border-top: 1.5px solid var(--axis); }
 
   .table-wrap { overflow-x: auto; margin-top: 12px; position: relative; }
   table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
@@ -440,73 +487,59 @@
 <a href="#top" class="back-to-top" id="back-to-top" aria-label="Back to top">&uarr;</a>
 <header class="masthead" id="top">
   <h1>Medical SDEC Demand and Capacity Tool</h1>
-  <p class="lede">A bottom-up model of Same Day Emergency Care demand and capacity at Lister. Set the current state from shift-level staffing and the hourly demand profile, then test a future state by adjusting demand and capacity assumptions. Every input is editable.</p>
+  <p class="lede">A bottom-up model of Same Day Emergency Care demand and capacity at Lister, built area by area. Each area — the two bays, the ambulatory chairs, the hot clinic rooms, the darting rooms and triage — carries its own spaces, its own staff and its own hourly demand; the floor-wide numbers are the roll-up. Set the current state, then test a future state by adjusting demand and capacity assumptions. Every input is editable.</p>
 </header>
 
 <section id="how">
   <div class="eyebrow">Method</div>
   <h2>How to Use the Model</h2>
   <div class="grid cols-4" style="margin-top:14px">
-    <a class="card step-card" href="#capacity"><div class="step-num">STEP 1</div><div class="step-title">Capacity Inputs</div><div class="step-body">Enter each medical and nursing shift line — WTE, shift start and end, and the expected patients seen per person per hour. Seeded from the SDEC context note and monthly audit; edit any cell.</div></a>
-    <a class="card step-card" href="#demand"><div class="step-num">STEP 2</div><div class="step-title">Demand Inputs</div><div class="step-body">Enter the average patients present in SDEC each hour, 07:00–24:00, split by referral source. Switch between the weekday and weekend demand profiles.</div></a>
-    <a class="card step-card" href="#current"><div class="step-num">STEP 3</div><div class="step-title">Current State</div><div class="step-body">Review demand against capacity, hour by hour, for medical and nursing. See where and when SDEC is over or under capacity today.</div></a>
-    <a class="card step-card" href="#future"><div class="step-num">STEP 4</div><div class="step-title">Future State</div><div class="step-body">Toggle demand and capacity assumptions to test a future state, and read the change against today — including an indicative cost or saving.</div></a>
+    <a class="card step-card" href="#capacity"><div class="step-num">STEP 1</div><div class="step-title">Capacity Inputs</div><div class="step-body">Give each area its physical spaces and its own roster — WTE, shift start and end, and the expected patients seen per person per hour. Staff who circulate go in the floating pool.</div></a>
+    <a class="card step-card" href="#demand"><div class="step-num">STEP 2</div><div class="step-title">Demand Inputs</div><div class="step-body">Enter the average patients present in each area each hour, 07:00–24:00. One row per area; the floor profile is their sum. Switch between weekday and weekend.</div></a>
+    <a class="card step-card" href="#current"><div class="step-num">STEP 3</div><div class="step-title">Current State</div><div class="step-body">Review demand against capacity hour by hour — medical, nursing and physical space — for the whole floor and then area by area, to see which area is actually the problem.</div></a>
+    <a class="card step-card" href="#future"><div class="step-num">STEP 4</div><div class="step-title">Future State</div><div class="step-body">Add a nurse, a doctor or physical space to a named area, dial demand up or down, and read the change against today — including an indicative cost or saving.</div></a>
   </div>
 </section>
 
 <section id="capacity">
   <div class="eyebrow">Step 1</div>
-  <h2>Capacity Inputs — Per Staff Group</h2>
-  <p class="section-note">Input shift-level data for each staff group: WTE, shift start and end times, and the expected patients seen per person per hour (medical). Each line also has its own <strong>Cost/WTE</strong> — defaults to the global assumption below but can be overridden per line item where actual grade/band costs are known. For nursing, tick the lines that carry patients in the bays (&ldquo;Bay?&rdquo;) — these add capacity at the patients-per-nurse ratio set in the assumptions; co-ordinator, triage, hello and in-reach roles are on the floor but do not add capacity. Seeded from the SDEC context note and monthly audit (GP 0.5, twilight IMT 0.6, registrar 0.67, consultant 1.0 patients/hr). <strong>Nursing shift times are placeholders — confirm with the roster lead.</strong></p>
+  <h2>Capacity Inputs — Per Area</h2>
+  <p class="section-note">SDEC is not one pool: each <strong>area</strong> has its own physical spaces, its own staff and its own demand. Give each area below its trolleys, chairs and rooms, then its roster — WTE, shift start and end times, and the expected patients seen per person per hour for each medical grade. Each line also has its own <strong>Cost/WTE</strong>, defaulting to the global assumption but overridable where actual grade/band costs are known. For nursing, tick &ldquo;Holds patients?&rdquo; on the lines that hold patients in that area — these add holding capacity at the patients-per-nurse figure on the line, and are then capped at the area&rsquo;s physical spaces. Staff who circulate rather than sitting in one area go in the <strong>Floating / unassigned</strong> pool at the bottom; they count towards floor-wide capacity and are attributed to areas each hour in proportion to that area&rsquo;s demand. Move any line between areas with its <strong>Area</strong> dropdown. <strong>The per-area split of staffing is a mechanical placeholder from the old floor-wide roster — confirm the real establishment area by area.</strong></p>
 
   <div class="toggle-row">
     <label class="switch"><input type="checkbox" id="weekend-view" aria-label="Weekend view"><span class="track"></span></label>
     <span><strong>Weekend view</strong> — switches the model to the <strong>weekend demand profile only</strong> (and the staff lines marked &ldquo;Weekend&rdquo;). Turn off to return to the weekday view.</span>
   </div>
 
-  <details class="drawer" open>
-    <summary>Medical / Clinical (Update Inputs Here)</summary>
-    <div class="drawer-body">
-      <p class="section-note" style="font-size:12.5px">Patients assessed per clinician per hour is the whole-shift average throughput, including breaks and documentation. WTE follows the audit&rsquo;s expected numbers (consultant ×1, registrar ×2, SHO ×3); the SHO rate is an assumption within the 0.5–1/hr envelope. Edit any cell.</p>
-      <div class="table-wrap"><table class="roster-table" id="cap-med"></table></div>
-      <p style="margin:8px 0 0"><button class="btn-small" id="add-med" type="button">+ Add clinical line</button></p>
-    </div>
-  </details>
-
-  <details class="drawer" open>
-    <summary>Nursing (Update Inputs Here)</summary>
-    <div class="drawer-body">
-      <p class="section-note" style="font-size:12.5px">From the SDEC nursing template. &ldquo;Bay?&rdquo; ticked = the line carries patients and adds capacity; &ldquo;Patients safely managed per nurse&rdquo; is the number of patients each nurse on that line holds (overrides the global patients-per-nurse ratio in the assumptions; leave blank to use the global default). Unticked = fixed role (NIC co-ordinator, triage, hello, in-reach, EMT). Weekend template is lighter (bay ×2, EMT ×1). Shift times are placeholders.</p>
-      <div class="table-wrap"><table class="roster-table" id="cap-nur"></table></div>
-      <p style="margin:8px 0 0"><button class="btn-small" id="add-nur" type="button">+ Add nursing line</button></p>
-    </div>
-  </details>
+  <div id="area-cards"></div>
 
   <div class="card chart-block">
     <div class="chart-title">Capacity on the Floor, by Hour — Current State</div>
-    <div class="chart-sub">Medical seeing capacity (patients/hr) and nursing capacity (patients that can be held), for the selected day type.</div>
+    <div class="chart-sub">Floor-wide totals, rolled up across every area: medical seeing capacity (patients/hr), nursing holding capacity (patients that can be held) and the physical footprint.</div>
     <div class="chart-wrap" id="chart-cap"></div>
     <div class="legend">
       <span class="key"><span class="swatch" style="border-color:var(--accent)"></span>Medical seeing capacity /hr</span>
-      <span class="key"><span class="swatch" style="border-color:var(--aqua)"></span>Nursing capacity</span>
+      <span class="key"><span class="swatch" style="border-color:var(--aqua)"></span>Nursing holding capacity</span>
+      <span class="key"><span class="swatch dash" style="border-color:var(--violet)"></span>Physical spaces</span>
     </div>
   </div>
 </section>
 
 <section id="demand">
   <div class="eyebrow">Step 2</div>
-  <h2>Demand Inputs — Patients Attending, 07:00–24:00</h2>
-  <p class="section-note">The demand profile is the <strong>average number of patients present in SDEC each hour</strong>, taken from the activity export (Apr–Jul 2026). Weekday demand peaks at ~21 patients present around 15:00; weekend runs about half that. Below the profile, the same demand is broken into its referral sources from the monthly audit — ED pull (~38%), follow-up (~27%), GP (~22%), hot clinics (~14%) and 111. Editing an hour changes the shape; editing a source rescales the day. Arrivals per hour are derived from the profile and the assumed length of stay.</p>
+  <h2>Demand Inputs — Patients Attending by Area, 07:00–24:00</h2>
+  <p class="section-note">The editable primitive is <strong>area × hour</strong>: the average number of patients present <em>in that area</em> each hour. Every row of the grid below is one area&rsquo;s own demand curve, and the floor-wide profile is their sum. The v1 floor-wide profile (activity export, Apr–Jul 2026) has been split mechanically as a starting point — hot-clinic referrals to the Hot Clinic Rooms, every other referral source to the ambulatory chairs, both on the floor-wide hourly shape. <strong>Bay 1, Bay 2, Darting and Triage carry no placeholder demand at all</strong>, because nothing in the referral-source split maps to them; nothing was invented. Replace these rows with real per-area attendance as soon as the SDEC team can supply it. Arrivals per hour are derived from each area&rsquo;s profile and the assumed length of stay.</p>
 
   <div class="grid cols-4">
     <div class="card"><div class="stat-label">Attendances / day</div><div class="stat-value" id="dem-attend">—</div><div class="stat-sub" id="dem-attend-sub">—</div></div>
     <div class="card"><div class="stat-label">Peak patients present</div><div class="stat-value" id="dem-peak">—</div><div class="stat-sub" id="dem-peak-sub">—</div></div>
+    <div class="card"><div class="stat-label">Physical spaces</div><div class="stat-value" id="dem-spaces">—</div><div class="stat-sub" id="dem-spaces-sub">—</div></div>
     <div class="card"><div class="stat-label">Assumed length of stay</div><div class="stat-value" id="dem-los">—</div><div class="stat-sub">assumption — set below</div></div>
   </div>
 
   <div class="card chart-block">
-    <div class="chart-title">Patients Present in SDEC, by Hour of Day</div>
-    <div class="chart-sub" id="dem-chart-sub">Average day, from the activity export. Editable in the drawer below.</div>
+    <div class="chart-title">Patients Present, by Hour of Day — Floor Total</div>
+    <div class="chart-sub" id="dem-chart-sub">Average day, summed across every area. Editable in the grid below.</div>
     <div class="chart-wrap" id="chart-demand"></div>
     <div class="legend">
       <span class="key"><span class="swatch" style="border-color:var(--aqua)"></span>Patients present</span>
@@ -514,30 +547,34 @@
     </div>
   </div>
 
+  <div class="card chart-block">
+    <div class="chart-title">Patients Present, by Hour of Day — by Area</div>
+    <div class="chart-sub">The same demand taken apart. A flat line at zero is an area with no demand entered yet, not an empty area.</div>
+    <div class="chart-wrap" id="chart-demand-areas"></div>
+    <div class="legend" id="legend-demand-areas"></div>
+  </div>
+
   <details class="drawer" open>
-    <summary>Demand Profile — Patients Present Each Hour (Editable)</summary>
+    <summary>Demand Grid — Patients Present per Area, Each Hour (Editable)</summary>
     <div class="drawer-body">
       <div class="toggle-row" style="margin-bottom:6px">
         <label class="switch"><input type="checkbox" id="weekend-view-2" aria-label="Weekend view"><span class="track"></span></label>
-        <span><strong>Weekend view</strong> — edit the weekend demand profile (kept in sync with the toggle in Step 1).</span>
+        <span><strong>Weekend view</strong> — edit the weekend demand profiles (kept in sync with the toggle in Step 1).</span>
       </div>
-      <p class="section-note" style="font-size:12.5px" id="dem-grid-note">Editing the weekday profile. Flip the weekend toggle to edit the weekend profile.</p>
-      <div class="input-grid" id="demand-grid"></div>
+      <p class="section-note" style="font-size:12.5px" id="dem-grid-note">Editing the weekday profiles. Flip the weekend toggle to edit the weekend profiles.</p>
+      <div class="table-wrap"><table class="roster-table demand-matrix" id="demand-matrix"></table></div>
     </div>
   </details>
 
-  <details class="drawer" open>
-    <summary>Referral Sources &amp; Assumptions</summary>
+  <details class="drawer">
+    <summary>Referral Sources per Area (Secondary Lens) &amp; Assumptions</summary>
     <div class="drawer-body">
-      <div class="input-grid">
-        <div class="field"><label for="in-src-edpull">ED pull</label> <button type="button" class="src" data-detail="Monthly audit mean: 14.2/day (38% of attendances). Patients streamed from ED to SDEC.">audit · 38%</button><input id="in-src-edpull" type="number" step="0.5" data-bind="sources.edPull"><span class="unit">/day</span></div>
-        <div class="field"><label for="in-src-gp">GP referrals</label> <button type="button" class="src" data-detail="Monthly audit mean: 8.0/day (22%). Direct GP / community referrals.">audit · 22%</button><input id="in-src-gp" type="number" step="0.5" data-bind="sources.gp"><span class="unit">/day</span></div>
-        <div class="field"><label for="in-src-followup">Follow-up</label> <button type="button" class="src" data-detail="Monthly audit mean: 9.9/day (27%). Planned SDEC follow-up attendances.">audit · 27%</button><input id="in-src-followup" type="number" step="0.5" data-bind="sources.followup"><span class="unit">/day</span></div>
-        <div class="field"><label for="in-src-111">111</label> <button type="button" class="src" data-detail="Monthly audit mean: ~0.1/day. NHS 111 / care navigation direct to SDEC — currently negligible, a growth opportunity.">audit · &lt;1%</button><input id="in-src-111" type="number" step="0.5" data-bind="sources.oneoneone"><span class="unit">/day</span></div>
-        <div class="field"><label for="in-src-hotclinic">Hot clinics</label> <button type="button" class="src" data-detail="Monthly audit: frailty, cardiology, rheumatology, ACT/respiratory and other hot clinics ~5.0/day combined (14%). Demand fluctuates by day of week.">audit · 14%</button><input id="in-src-hotclinic" type="number" step="0.5" data-bind="sources.hotClinic"><span class="unit">/day</span></div>
-        <div class="field"><label for="in-meanlos">Assumed length of stay</label> <button type="button" class="src" data-detail="Implied by the data: ~213 patient-hours/day weekday ÷ ~42.8 attendances ≈ 5.0h. Confirm from SDEC actuals.">data-implied ≈ 5h</button><input id="in-meanlos" type="number" step="0.25" data-bind="meanLos"><span class="unit">hours</span></div>
+      <p class="section-note" style="font-size:12.5px">Referral sources are no longer what drives the model — the area × hour grid above is. They are kept per area as a reporting lens, and they decide how a future-state <em>per-source</em> multiplier reaches each area: turning hot clinics up scales the areas that actually take hot-clinic referrals, and nothing else. Floor-wide source volumes are the column totals.</p>
+      <div class="table-wrap"><table class="roster-table" id="area-sources"></table></div>
+      <div class="input-grid" style="margin-top:14px">
+        <div class="field"><label for="in-meanlos">Assumed length of stay</label> <button type="button" class="src" data-detail="Implied by the data: ~213 patient-hours/day weekday ÷ ~42.8 attendances ≈ 5.0h, applied to every area. A hot clinic or darting attendance is almost certainly much shorter than a bay stay — per-area length of stay is a known gap.">data-implied ≈ 5h</button><input id="in-meanlos" type="number" step="0.25" data-bind="meanLos"><span class="unit">hours</span></div>
       </div>
-      <div class="warnbox" id="warn-src">Referral sources don&rsquo;t reconcile to the profile — the numbers are indicative; the hourly profile drives the model.</div>
+      <div class="warnbox" id="warn-src">Referral sources don&rsquo;t reconcile to the profile — the numbers are indicative; the hourly area × hour grid drives the model.</div>
     </div>
   </details>
 </section>
@@ -545,15 +582,19 @@
 <section id="assumptions">
   <div class="eyebrow">Assumptions</div>
   <h2>Assumptions &amp; Ratios</h2>
-  <p class="section-note">The bridge between capacity resources and demand. Patients-per-nurse converts bay nurses into nursing capacity; physical spaces caps how many patients can ever be present at once; the assumed length of stay links arrivals to patients present. The cost per WTE drives the indicative cost/saving in Step 4. Select any dotted tag for provenance. Set these with the SDEC clinical and nursing leads.</p>
+  <p class="section-note">The bridge between capacity resources and demand. Patients-per-nurse converts nurses into holding capacity; each area&rsquo;s physical spaces cap how many patients can ever be present <em>there</em> at once (set them per area in Step 1, summarised below); the assumed length of stay links arrivals to patients present. The cost per WTE drives the indicative cost/saving in Step 4. Select any dotted tag for provenance. Set these with the SDEC clinical and nursing leads.</p>
   <div class="card">
     <div class="input-grid">
-      <div class="field"><label for="in-nurseratio">Patients per bay nurse</label> <button type="button" class="src" data-detail="Local assumption. SDEC bays weekday: ~4 bay nurses hold a peak ~21 present ≈ 1:5; a 1:4 ratio is a common SDEC/AMU planning value. Confirm with the nursing lead.">local · ≈1:4</button><input id="in-nurseratio" type="number" step="0.5" data-bind="nurseRatio"><span class="unit">patients/nurse</span></div>
-      <div class="field"><label for="in-chairs">Physical spaces (chairs/trolleys)</label> <button type="button" class="src" data-detail="Physical ceiling on patients present. Peak observed presence is ~21 weekday; set to the funded footprint.">footprint ceiling</button><input id="in-chairs" type="number" step="1" data-bind="chairs"><span class="unit">spaces</span></div>
+      <div class="field"><label for="in-nurseratio">Patients per nurse (default)</label> <button type="button" class="src" data-detail="Local assumption, used only where a nursing line sets no figure of its own. A 1:4 ratio is a common SDEC/AMU planning value. Confirm with the nursing lead.">local · ≈1:4</button><input id="in-nurseratio" type="number" step="0.5" data-bind="nurseRatio"><span class="unit">patients/nurse</span></div>
       <div class="field"><label for="in-openhour">Opening time</label> <button type="button" class="src" data-detail="SDEC referral/operating window. Activity begins ~08:00, negligible before.">activity export</button><input id="in-openhour" type="number" step="1" data-bind="openHour"><span class="unit">:00</span></div>
       <div class="field"><label for="in-closehour">Closing time</label> <button type="button" class="src" data-detail="SDEC winds down late evening; audit shows ED referrals stop ~17:00–18:00 with patients present to ~23:00.">audit</button><input id="in-closehour" type="number" step="1" data-bind="closeHour"><span class="unit">:00</span></div>
       <div class="field"><label for="in-costmed">Cost per medical WTE</label> <button type="button" class="src" data-detail="Default indicative fully-loaded annual cost of one medical WTE (blended across grades), used where a line item doesn't set its own cost. Placeholder — set with finance.">placeholder</button><input id="in-costmed" type="number" step="1000" data-bind="costMedWTE"><span class="unit">£/yr</span></div>
       <div class="field"><label for="in-costnur">Cost per nursing WTE</label> <button type="button" class="src" data-detail="Default indicative fully-loaded annual cost of one nursing WTE (blended across bands), used where a line item doesn't set its own cost. Placeholder — set with finance.">placeholder</button><input id="in-costnur" type="number" step="1000" data-bind="costNurWTE"><span class="unit">£/yr</span></div>
+    </div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="chart-title">Physical Footprint</div>
+      <div class="chart-sub">Confirmed with the SDEC Service Coordinator. Edit the counts per area in Step 1.</div>
+      <div class="floor-list" id="footprint-summary"></div>
     </div>
   </div>
 </section>
@@ -561,14 +602,16 @@
 <section id="current">
   <div class="eyebrow">Step 3</div>
   <h2>Current State — Demand vs Capacity</h2>
-  <p class="section-note">Today&rsquo;s demand against today&rsquo;s capacity, hour by hour, for the selected day type. The nursing view asks: are there enough bay nurses for the patients present? The medical view asks: can the clinicians on shift keep pace with arrivals, or does a queue build? Medical and nursing capacity are never added together — the overall service view classifies each hour by whichever, if either, is under pressure.</p>
+  <p class="section-note">Today&rsquo;s demand against today&rsquo;s capacity, hour by hour, for the selected day type — first for the whole floor, then area by area. Three questions are asked separately and never added together. Medical: can the clinicians on shift keep pace with arrivals, or does a queue build? Nursing: are there enough nurses for the patients present? Space: are there enough trolleys, chairs and rooms to put them in? <strong>A floor-wide &ldquo;within capacity&rdquo; reading can hide one area quietly overflowing — the &ldquo;By area&rdquo; view below is where you find out.</strong></p>
 
-  <div class="grid cols-5">
+  <div class="grid cols-auto">
     <div class="card"><div class="stat-label">Attendances / day</div><div class="stat-value" id="cur-attend">—</div><div class="stat-sub" id="cur-attend-sub">—</div></div>
     <div class="card"><div class="stat-label">Peak nursing use</div><div class="stat-value" id="cur-nur-util">—</div><div class="stat-sub" id="cur-nur-util-sub">—</div></div>
     <div class="card"><div class="stat-label">Medical capacity used</div><div class="stat-value" id="cur-med-util">—</div><div class="stat-sub" id="cur-med-util-sub">—</div></div>
+    <div class="card"><div class="stat-label">Peak space use</div><div class="stat-value" id="cur-space-util">—</div><div class="stat-sub" id="cur-space-util-sub">—</div></div>
     <div class="card"><div class="stat-label">Peak queue to be seen</div><div class="stat-value" id="cur-queue">—</div><div class="stat-sub" id="cur-queue-sub">—</div></div>
     <div class="card"><div class="stat-label">Hours constrained</div><div class="stat-value" id="cur-constrained">—</div><div class="stat-sub" id="cur-constrained-sub">—</div></div>
+    <div class="card"><div class="stat-label">Areas constrained</div><div class="stat-value" id="cur-areas">—</div><div class="stat-sub" id="cur-areas-sub">—</div></div>
   </div>
 
   <div class="callout" id="cur-interpretation">
@@ -578,11 +621,12 @@
 
   <div class="card chart-block">
     <div class="chart-title">Demand vs Capacity, by Hour</div>
-    <div class="chart-sub">Pick a view below. <strong>Overall service</strong> shows a simple hour-by-hour status — within capacity, medical constraint, nursing constraint, both, or closed — because medical capacity (a flow measure) and nursing capacity (a concurrency measure) are never added together. <strong>Medical detail</strong> shows arrivals against seeing capacity and the queue that forms. <strong>Nursing detail</strong> shows patients present against nursing capacity (bay nurses × patients-per-nurse). Each detail chart has its own hour-by-hour balance bar underneath: blue/green means spare capacity, red/amber means demand is exceeding capacity that hour.</div>
+    <div class="chart-sub">Pick a view below. <strong>Overall service</strong> shows the floor-wide hour-by-hour status — within capacity, or which of medical, nursing and physical space is exceeded — because a flow measure, a concurrency measure and a hard ceiling are never added together. <strong>By area</strong> repeats that classification for every area against its own demand, roster and spaces. <strong>Medical detail</strong> shows arrivals against seeing capacity and the queue that forms. <strong>Holding detail</strong> shows patients present against nursing capacity and physical spaces. Each detail chart has its own hour-by-hour balance bar underneath: blue/green means spare capacity, red means demand is exceeding capacity that hour.</div>
     <div class="seg" id="seg-cur" role="tablist" aria-label="Current-state chart view">
       <button type="button" id="seg-cur-overall" role="tab" data-view="overall" class="active" aria-selected="true" aria-controls="panels-cur" tabindex="0">Overall service</button>
+      <button type="button" id="seg-cur-areas" role="tab" data-view="areas" aria-selected="false" aria-controls="panels-cur" tabindex="-1">By area</button>
       <button type="button" id="seg-cur-med" role="tab" data-view="med" aria-selected="false" aria-controls="panels-cur" tabindex="-1">Medical detail</button>
-      <button type="button" id="seg-cur-nur" role="tab" data-view="nur" aria-selected="false" aria-controls="panels-cur" tabindex="-1">Nursing detail</button>
+      <button type="button" id="seg-cur-nur" role="tab" data-view="nur" aria-selected="false" aria-controls="panels-cur" tabindex="-1">Holding detail</button>
     </div>
     <div id="panels-cur" role="tabpanel" aria-labelledby="seg-cur-overall" tabindex="0"></div>
   </div>
@@ -591,14 +635,16 @@
 <section id="future">
   <div class="eyebrow">Step 4</div>
   <h2>Future State — Demand vs Capacity</h2>
-  <p class="section-note">Test a change. On the demand side, dial each referral source up or down (or type an explicit attendances/day figure), apply an overall growth factor, or model better flow with a shorter length of stay. On the capacity side, switch on a ready-made preset lever, or pull in every current-state shift line and add to it directly. The charts below redraw for the future state, with the current state shown as a faint dashed line for comparison, and the headline change — including the net WTE and cost of every addition — quantified below.</p>
+  <p class="section-note">Test a change. On the demand side, dial each referral source up or down (or type an explicit attendances/day figure), apply an overall growth factor, or model better flow with a shorter length of stay — a per-source dial reaches each area through that area&rsquo;s own referral mix. On the capacity side, switch on a ready-made preset lever, add physical spaces to a named area, or pull in every current-state shift line and add to it directly; every addition targets a specific area, or the floating pool. The charts below redraw for the future state, with the current state shown as a faint dashed line for comparison, and the headline change — including the net WTE and cost of every addition — quantified below.</p>
 
-  <div class="grid cols-5">
+  <div class="grid cols-auto">
     <div class="card"><div class="stat-label">Attendances / day</div><div class="stat-value" id="fut-attend">—</div><div class="stat-sub" id="fut-attend-sub">—</div></div>
     <div class="card"><div class="stat-label">Peak nursing use</div><div class="stat-value" id="fut-nur-util">—</div><div class="stat-sub" id="fut-nur-util-sub">—</div></div>
     <div class="card"><div class="stat-label">Medical capacity used</div><div class="stat-value" id="fut-med-util">—</div><div class="stat-sub" id="fut-med-util-sub">—</div></div>
+    <div class="card"><div class="stat-label">Peak space use</div><div class="stat-value" id="fut-space-util">—</div><div class="stat-sub" id="fut-space-util-sub">—</div></div>
     <div class="card"><div class="stat-label">Peak queue to be seen</div><div class="stat-value" id="fut-queue">—</div><div class="stat-sub" id="fut-queue-sub">—</div></div>
     <div class="card"><div class="stat-label">Hours constrained</div><div class="stat-value" id="fut-constrained">—</div><div class="stat-sub" id="fut-constrained-sub">—</div></div>
+    <div class="card"><div class="stat-label">Areas constrained</div><div class="stat-value" id="fut-areas">—</div><div class="stat-sub" id="fut-areas-sub">—</div></div>
   </div>
 
   <div class="callout" id="fut-interpretation">
@@ -618,8 +664,15 @@
     </div>
     <div class="card">
       <div class="chart-title">Capacity Levers</div>
-      <div class="chart-sub">Switch on a ready-made preset, or build your own from the current-state roster below. Added lines follow the day-type and weekend toggle.</div>
+      <div class="chart-sub">Switch on a ready-made preset, or build your own from the current-state roster below. Each preset targets an area — change the dropdown to point it somewhere else, or at the floating pool. Added lines follow the day-type and weekend toggle.</div>
       <div class="grid cols-1" id="capacity-levers" style="margin-top:12px"></div>
+
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">
+        <div class="chart-title">Physical Spaces by Area</div>
+        <div class="chart-sub">Add (or remove) trolleys, chairs and rooms in a named area. Space changes are reported but not costed — capital and estates cost is out of scope for this model.</div>
+        <div class="input-grid" id="area-space-levers" style="margin-top:10px"></div>
+      </div>
+
       <div class="input-grid" style="margin-top:14px">
         <div class="field"><label for="in-c4cpct">C4C — demand treated before hospital</label> <button type="button" class="src" data-detail="Care coordination / virtual pathway (C4C): this share of demand is managed before reaching SDEC&rsquo;s physical footprint, so those patients do not occupy a chair and are removed from physical-space requirements. Medical review capacity is unaffected.">pathway</button><input id="in-c4cpct" type="number" min="0" max="100" step="1" data-bind="future.c4cPct"><span class="unit">% of demand</span></div>
       </div>
@@ -646,11 +699,12 @@
 
   <div class="card chart-block">
     <div class="chart-title">Demand vs Capacity, by Hour (Future)</div>
-    <div class="chart-sub">Future demand and capacity for the selected day type. Faint dashed lines are today, for comparison. Pick a view below — <strong>Overall service</strong> shows the hourly status strip for the future state; <strong>Medical detail</strong> and <strong>Nursing detail</strong> keep their own hour-by-hour balance bar showing spare capacity (blue/green) or shortfall (red/amber).</div>
+    <div class="chart-sub">Future demand and capacity for the selected day type. Faint dashed lines are today, for comparison. Pick a view below — <strong>Overall service</strong> shows the floor-wide hourly status strip for the future state, <strong>By area</strong> shows the same per area, and <strong>Medical detail</strong> and <strong>Holding detail</strong> keep their own hour-by-hour balance bar showing spare capacity (blue/green) or shortfall (red).</div>
     <div class="seg" id="seg-fut" role="tablist" aria-label="Future-state chart view">
       <button type="button" id="seg-fut-overall" role="tab" data-view="overall" class="active" aria-selected="true" aria-controls="panels-fut" tabindex="0">Overall service</button>
+      <button type="button" id="seg-fut-areas" role="tab" data-view="areas" aria-selected="false" aria-controls="panels-fut" tabindex="-1">By area</button>
       <button type="button" id="seg-fut-med" role="tab" data-view="med" aria-selected="false" aria-controls="panels-fut" tabindex="-1">Medical detail</button>
-      <button type="button" id="seg-fut-nur" role="tab" data-view="nur" aria-selected="false" aria-controls="panels-fut" tabindex="-1">Nursing detail</button>
+      <button type="button" id="seg-fut-nur" role="tab" data-view="nur" aria-selected="false" aria-controls="panels-fut" tabindex="-1">Holding detail</button>
     </div>
     <div id="panels-fut" role="tabpanel" aria-labelledby="seg-fut-overall" tabindex="0"></div>
   </div>
@@ -665,14 +719,19 @@
   <div class="callout">
     <strong>What the SDEC Team Needs to Supply or Confirm to Firm Up This Template:</strong>
     <div class="floor-list">
+      <div><strong>Real per-area staffing</strong> — headcounts and shift patterns area by area. The old roster was not area-tagged at all, so the bay nursing lines have simply been split evenly across Bay 1 and Bay 2 and the EMT lines put in Darting</div>
+      <div><strong>Real per-area hourly attendance</strong> — the area × hour grid in Step 2 is currently a mechanical split of the floor-wide profile by referral source; Bay 1, Bay 2, Darting and Triage have no demand at all</div>
+      <div><strong>Whether the 40 general chairs have any dedicated staff</strong> or are covered by floating/bay nurses — they currently have no nursing establishment of their own, so only the 40-space ceiling constrains them</div>
+      <div><strong>Whether &ldquo;patients present&rdquo; already includes time in the Hot Clinic, Darting and Triage rooms</strong>, or whether those are shorter, separate throughput events with different concurrency dynamics from a bay stay</div>
+      <div><strong>Whether the one usable Triage room holds patients</strong> (an occupancy to model) or is a pure process step with no &ldquo;present&rdquo; time at all</div>
+      <div><strong>Which clinicians are genuinely fixed to an area</strong> — every medical line is currently floating, on the assumption that clinicians circulate; a GP who only ever runs hot clinics should be re-tagged</div>
       <div>Nursing shift start/end times — the template gives roles and counts but not timings (roster lead / Claudia)</div>
       <div>SHO patients-per-hour rate — assumed 0.5/hr within the 0.5–1 envelope; confirm from job plans</div>
-      <div>Mean and distribution of length of stay by referral source, to replace the ~5h data-implied value</div>
-      <div>Physical footprint — number of funded chairs and trolley spaces</div>
+      <div>Mean and distribution of length of stay <em>by area</em> and by referral source, to replace the single ~5h data-implied value applied everywhere</div>
       <div>Patients-per-nurse ratio the bays are actually run to (assumed ~1:4)</div>
-      <div>Hot-clinic schedule by day of week (frailty, cardiology, rheumatology, ACT/respiratory) — demand is day-specific</div>
+      <div>Hot-clinic schedule by day of week (frailty, cardiology, rheumatology, ACT/respiratory) — demand is day-specific and booked to a template</div>
       <div>Whether weekend capacity lines and demand should be modelled separately per Saturday and Sunday</div>
-      <div>Arrivals-by-hour (not just presence-by-hour) if available, to replace the derived arrivals curve</div>
+      <div>Arrivals-by-hour per area (not just presence-by-hour) if available, to replace the derived arrivals curve</div>
     </div>
   </div>
 </section>
@@ -683,45 +742,77 @@
 <script>
 "use strict";
 
-// ---------- seed data (from SDEC activity export, Apr–Jul 2026) ----------
-// average patients PRESENT in SDEC by hour of day (index = clock hour), 07:00–23:00
-const WD_OCC = [0,0,0,0,0,0,0, 0.69,0.69,5.73,12.05,16.09,18.16,20.03,20.95,21.26,20.83,18.99,16.98,14.52,10.95,7.57,4.91,3.09];
-const WE_OCC = [0,0,0,0,0,0,0, 0.65,0.65,3.32,6.68,8.85,10.15,11.12,11.29,10.71,10.76,9.24,7.74,6.24,4.21,2.29,1.35,0.91];
+// ---------- seed data (physical layout confirmed by the SDEC Service Coordinator;
+// the per-area SPLIT of the Apr-Jul 2026 activity export and of the old floor-wide
+// roster is a mechanical PLACEHOLDER - see the Data to Confirm section) ----------
+// Each area's demand is the average patients PRESENT in that area by hour of day
+// (index = clock hour). The two bays, darting and triage carry no placeholder
+// demand: nothing in the referral-source split maps to them, so nothing was invented.
+const AC_WD = [0,0,0,0,0,0,0, 0.6,0.6,4.96,10.43,13.93,15.72,17.34,18.13,18.4,18.03,16.44,14.7,12.57,9.48,6.55,4.25,2.67];
+const AC_WE = [0,0,0,0,0,0,0, 0.56,0.56,2.87,5.78,7.66,8.79,9.63,9.77,9.27,9.31,8.0,6.7,5.4,3.64,1.98,1.17,0.79];
+const HC_WD = [0,0,0,0,0,0,0, 0.09,0.09,0.77,1.62,2.16,2.44,2.69,2.82,2.86,2.8,2.55,2.28,1.95,1.47,1.02,0.66,0.42];
+const HC_WE = [0,0,0,0,0,0,0, 0.09,0.09,0.45,0.9,1.19,1.36,1.49,1.52,1.44,1.45,1.24,1.04,0.84,0.57,0.31,0.18,0.12];
+const ZERO = new Array(24).fill(0);
+const noSrc = () => ({edPull: 0, gp: 0, followup: 0, oneoneone: 0, hotClinic: 0});
 
 const state = {
   meanLos: 5.0,
   nurseRatio: 4,
-  chairs: 21,
   openHour: 7,
   closeHour: 24,
   costMedWTE: 110000,
   costNurWTE: 42000,
   weekendView: false,
   ui: { curView: "overall", futView: "overall" },
-  demand: { wd: WD_OCC.slice(), we: WE_OCC.slice() },
-  sources: { edPull: 14.2, gp: 8.0, followup: 9.9, oneoneone: 0.1, hotClinic: 5.0 },
+  // Each area is self-contained: physical spaces, a nursing-role flag, its own
+  // hourly demand curves and its own referral-source mix. Staff are tagged to an
+  // area on the capacity lines below (area: "" = floating/unassigned).
+  areas: [
+    {id: "bay-1", name: "Bay 1", trolleys: 3, chairs: 3, rooms: 0, nursingRole: true, placeholderDemand: true,
+      note: "3 trolleys + 3 chairs. Patients here are held by bay nurses, so the patients-per-nurse holding capacity applies and is then capped at the 6 physical spaces.",
+      demand: {wd: ZERO.slice(), we: ZERO.slice()}, sources: noSrc()},
+    {id: "bay-2", name: "Bay 2", trolleys: 3, chairs: 3, rooms: 0, nursingRole: true, placeholderDemand: true,
+      note: "3 trolleys + 3 chairs. Nursing/concurrency area, same as Bay 1.",
+      demand: {wd: ZERO.slice(), we: ZERO.slice()}, sources: noSrc()},
+    {id: "ambulatory-chairs", name: "Ambulatory Chairs", trolleys: 0, chairs: 40, rooms: 0, nursingRole: false, placeholderDemand: true,
+      note: "40 general chairs outside Bay 1/2. No nursing establishment of its own in the roster, so only the 40-space ceiling constrains it \u2014 whether these chairs have dedicated or float cover is an open question.",
+      demand: {wd: AC_WD.slice(), we: AC_WE.slice()}, sources: {edPull: 14.2, gp: 8.0, followup: 9.9, oneoneone: 0.1, hotClinic: 0}},
+    {id: "hot-clinic", name: "Hot Clinic Rooms", trolleys: 0, chairs: 0, rooms: 2, nursingRole: false, placeholderDemand: true,
+      note: "2 hot clinic rooms. Seeded with the hot-clinic referral volume on the floor-wide hourly shape \u2014 almost certainly wrong in shape, since hot clinics run to a booked template by day of week.",
+      demand: {wd: HC_WD.slice(), we: HC_WE.slice()}, sources: {edPull: 0, gp: 0, followup: 0, oneoneone: 0, hotClinic: 5.0}},
+    {id: "darting", name: "Darting Rooms", trolleys: 0, chairs: 0, rooms: 2, nursingRole: false, placeholderDemand: true,
+      note: "2 darting rooms, staffed by the EMT lines. EMTs add no nursing holding capacity, preserving the old treatment. No placeholder demand.",
+      demand: {wd: ZERO.slice(), we: ZERO.slice()}, sources: noSrc()},
+    {id: "triage", name: "Triage Room", trolleys: 0, chairs: 0, rooms: 1, nursingRole: false, placeholderDemand: true,
+      note: "There are 2 triage rooms but only 1 is usable for SDEC (the other belongs to AMU). No placeholder demand \u2014 triage may be a pure process step with no occupancy at all.",
+      demand: {wd: ZERO.slice(), we: ZERO.slice()}, sources: noSrc()},
+  ],
   capacity: {
-    // rate = patients seen per person per hour (SDEC context note); bay = carries patients (adds nursing capacity)
-    // cost = indicative annual cost per WTE (£/yr) for this line item — defaults to the global assumption, edit per line
+    // rate = patients seen per person per hour (medical) or patients held per nurse (nursing)
+    // bay  = this nursing line holds patients, adding holding capacity to its area
+    // area = the area this line is rostered to; "" = floating (circulates floor-wide)
+    // cost = indicative annual cost per WTE (\u00a3/yr) for this line item
     med: [
-      {label: "Consultant",          n: 1, rate: 1.0,  cost: 110000, s: "08:30", e: "16:30", days: "all"},
-      {label: "Long Day Registrar",  n: 2, rate: 0.67, cost: 110000, s: "08:30", e: "21:00", days: "wd"},
-      {label: "Long Day GP",         n: 1, rate: 0.5,  cost: 110000, s: "08:30", e: "20:00", days: "wd"},
-      {label: "Twilight IMT",        n: 1, rate: 0.6,  cost: 110000, s: "13:00", e: "22:00", days: "wd"},
-      {label: "SHO (assumed rate)",  n: 3, rate: 0.5,  cost: 110000, s: "08:30", e: "17:00", days: "wd"},
-      {label: "Registrar (weekend)", n: 1, rate: 0.67, cost: 110000, s: "09:00", e: "21:00", days: "we"},
-      {label: "SHO (weekend)",       n: 1, rate: 0.5,  cost: 110000, s: "09:00", e: "17:00", days: "we"},
+      {label: "Consultant",          n: 1, rate: 1.0,  cost: 110000, s: "08:30", e: "16:30", days: "all", area: ""},
+      {label: "Long Day Registrar",  n: 2, rate: 0.67, cost: 110000, s: "08:30", e: "21:00", days: "wd",  area: ""},
+      {label: "Long Day GP",         n: 1, rate: 0.5,  cost: 110000, s: "08:30", e: "20:00", days: "wd",  area: ""},
+      {label: "Twilight IMT",        n: 1, rate: 0.6,  cost: 110000, s: "13:00", e: "22:00", days: "wd",  area: ""},
+      {label: "SHO (assumed rate)",  n: 3, rate: 0.5,  cost: 110000, s: "08:30", e: "17:00", days: "wd",  area: ""},
+      {label: "Registrar (weekend)", n: 1, rate: 0.67, cost: 110000, s: "09:00", e: "21:00", days: "we",  area: ""},
+      {label: "SHO (weekend)",       n: 1, rate: 0.5,  cost: 110000, s: "09:00", e: "17:00", days: "we",  area: ""},
     ],
     nur: [
-      {label: "B7 NIC (co-ordinator)", n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "all", bay: false},
-      {label: "B6 Hello Nurse",        n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "all", bay: false},
-      {label: "B6 In-reach Nurse",     n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "all", bay: false},
-      {label: "Triage Nurse",          n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd", bay: false},
-      {label: "Bay — B6 NIC",          n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd", bay: true},
-      {label: "Bay — B5 nurses",       n: 3, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd", bay: true},
-      {label: "Bay nurses (weekend)",  n: 2, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "we", bay: true},
-      {label: "EMT (darting/float)",   n: 3, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd", bay: false},
-      {label: "EMT (weekend)",         n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "we", bay: false},
+      {label: "B7 NIC (co-ordinator)",   n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "all", bay: false, area: ""},
+      {label: "B6 Hello Nurse",          n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "all", bay: false, area: ""},
+      {label: "B6 In-reach Nurse",       n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "all", bay: false, area: ""},
+      {label: "Triage Nurse",            n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd",  bay: false, area: ""},
+      {label: "Bay 1 \u2014 B6 NIC",         n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd",  bay: true,  area: "bay-1"},
+      {label: "Bay 1 \u2014 B5 nurse",       n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd",  bay: true,  area: "bay-1"},
+      {label: "Bay 2 \u2014 B5 nurses",      n: 2, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd",  bay: true,  area: "bay-2"},
+      {label: "Bay 1 \u2014 nurse (weekend)", n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "we", bay: true,  area: "bay-1"},
+      {label: "Bay 2 \u2014 nurse (weekend)", n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "we", bay: true,  area: "bay-2"},
+      {label: "EMT (darting)",           n: 3, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "wd",  bay: false, area: "darting"},
+      {label: "EMT (weekend, darting)",  n: 1, rate: 4, cost: 42000, s: "08:00", e: "20:30", days: "we",  bay: false, area: "darting"},
     ],
   },
   future: {
@@ -729,23 +820,29 @@ const state = {
     losMult: 1.0,
     c4cPct: 0,
     srcMult: { edPull: 1, gp: 1, followup: 1, oneoneone: 1, hotClinic: 1 },
+    areaSpaceDeltas: {},
     customCapacity: { med: [], nur: [] },
     levers: [
-      {id: "ext-cons",   fam: "med", on: false, name: "Extend Consultant to 20:00", note: "Senior decision-maker on the floor into the evening peak",
-        add: [{label: "Consultant — evening", n: 1, rate: 1.0, s: "16:30", e: "20:00", days: "all"}]},
-      {id: "twilight-dr", fam: "med", on: false, name: "Add Twilight Doctor 14:00–24:00", note: "Covers the late arrivals tail so the queue clears before close",
+      {id: "ext-cons",   fam: "med", kind: "staff", on: false, area: "", name: "Extend Consultant to 20:00", note: "Senior decision-maker on the floor into the evening peak",
+        add: [{label: "Consultant \u2014 evening", n: 1, rate: 1.0, s: "16:30", e: "20:00", days: "all"}]},
+      {id: "twilight-dr", fam: "med", kind: "staff", on: false, area: "", name: "Add Twilight Doctor 14:00\u201324:00", note: "Covers the late arrivals tail so the queue clears before close",
         add: [{label: "Twilight doctor", n: 1, rate: 0.6, s: "14:00", e: "00:00", days: "all"}]},
-      {id: "extra-bay",  fam: "nur", on: false, name: "Add a Bay Nurse (Day)", note: "One more registered nurse in the bays, 08:00–20:30",
+      {id: "extra-bay",  fam: "nur", kind: "staff", on: false, area: "bay-1", name: "Add a Bay Nurse (Day)", note: "One more registered nurse holding patients, 08:00\u201320:30",
         add: [{label: "Extra bay nurse", n: 1, rate: 4, s: "08:00", e: "20:30", days: "all", bay: true}]},
-      {id: "wknd-uplift", fam: "med", on: false, name: "Weekend Medical Uplift", note: "Second weekend clinician to match weekday cover shape",
+      {id: "wknd-uplift", fam: "med", kind: "staff", on: false, area: "", name: "Weekend Medical Uplift", note: "Second weekend clinician to match weekday cover shape",
         add: [{label: "Weekend clinician", n: 1, rate: 0.6, s: "10:00", e: "20:00", days: "we"}]},
+      {id: "hot-clinic-room", fam: "none", kind: "space", on: false, area: "hot-clinic", name: "Open a Third Hot Clinic Room", note: "Physical space only \u2014 not costed here",
+        addSpaces: 1, add: []},
     ],
   },
 };
 
+
 // ---------- scenario persistence (auto-save to this browser + reset to defaults) ----------
 // Snapshot the seeded defaults before anything (including a previous session) mutates `state`.
-const STORAGE_KEY = "sdec-model-state-v1";
+// v2 = the per-area rearchitecture. The key is deliberately bumped so a scenario
+// saved against the old floor-wide shape is not half-merged into the new one.
+const STORAGE_KEY = "sdec-model-state-v2";
 const DEFAULT_STATE = JSON.parse(JSON.stringify(state));
 
 function deepAssign(target, src) {
@@ -812,6 +909,34 @@ const SOURCES = [
 // ---------- helpers ----------
 const f1 = n => (Math.round(n * 10) / 10).toLocaleString("en-GB", {minimumFractionDigits: 1, maximumFractionDigits: 1});
 const f0 = n => Math.round(n).toLocaleString("en-GB");
+
+// ======================================================================
+// MODEL CORE START - the maths, mirrored line-for-line by sdec_model/engine.py.
+// Everything between these markers is pure: it reads `state` and returns numbers,
+// touches no DOM, and is extracted verbatim by tests/js_engine_check.js so the
+// browser and the Python engine can be pinned against each other. Keep it that way.
+// ======================================================================
+const PRESSURE_EPS = 1e-6;
+const HOURS = 24;
+
+// Every value an hour's classification can take. A constrained hour names each
+// exceeded dimension, joined with "+" in a fixed order.
+const HOUR_CLASSES = ["within", "medical", "nursing", "space",
+  "medical+nursing", "medical+space", "nursing+space", "medical+nursing+space", "closed"];
+const DIMENSIONS = ["medical", "nursing", "space"];
+
+function classifyHour(medBad, nurBad, spaceBad) {
+  const parts = [];
+  if (medBad) parts.push("medical");
+  if (nurBad) parts.push("nursing");
+  if (spaceBad) parts.push("space");
+  return parts.length ? parts.join("+") : "within";
+}
+function emptyHourCounts() { const o = {}; for (const k of HOUR_CLASSES) o[k] = 0; return o; }
+function constrainedCount(counts) {
+  return HOUR_CLASSES.reduce((a, k) => a + ((k === "within" || k === "closed") ? 0 : counts[k]), 0);
+}
+
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 function parseHM(t) { const [h, m] = String(t).split(":").map(Number); return (h || 0) + (m || 0) / 60; }
 function inWindow(h) {
@@ -832,22 +957,34 @@ function covers(line, h) {
   return s < e ? (t >= s && t < e) : (t >= s || t < e);
 }
 function medCapacity(lines) {
-  return Array.from({length: 24}, (_, h) =>
+  return Array.from({length: HOURS}, (_, h) =>
     lines.reduce((a, l) => a + ((lineActive(l) && covers(l, h)) ? l.n * (l.rate || 0) : 0), 0));
 }
 function nurCapacity(lines) {
-  return Array.from({length: 24}, (_, h) =>
+  return Array.from({length: HOURS}, (_, h) =>
     lines.reduce((a, l) => {
       if (!(l.bay && lineActive(l) && covers(l, h))) return a;
       const perNurse = (Number.isFinite(l.rate) && l.rate > 0) ? l.rate : state.nurseRatio;
       return a + l.n * perNurse;
     }, 0));
 }
+// "" (or a missing tag) means the floating pool: staff who circulate floor-wide.
+function areaKeyOf(line) { return line.area == null ? "" : String(line.area); }
+function linesForArea(lines, areaKey) { return lines.filter(l => areaKeyOf(l) === areaKey); }
+function areaSpaces(area) {
+  return (Number(area.trolleys) || 0) + (Number(area.chairs) || 0) + (Number(area.rooms) || 0);
+}
+function floorSpaces() { return state.areas.reduce((a, ar) => a + areaSpaces(ar), 0); }
+function floorSources() {
+  const out = {};
+  for (const [k] of SOURCES) out[k] = state.areas.reduce((a, ar) => a + (Number(ar.sources[k]) || 0), 0);
+  return out;
+}
 
 // arrivals per hour from occupancy, by de-convolving a box-car length of stay
 function deconv(occ, los) {
-  const arr = new Array(24).fill(0);
-  for (let h = 0; h < 24; h++) {
+  const arr = new Array(HOURS).fill(0);
+  for (let h = 0; h < HOURS; h++) {
     let s = 0, k = 1;
     while (los - k > 0) { const i = h - k; if (i >= 0) s += arr[i] * Math.min(1, los - k); k++; }
     arr[h] = Math.max(0, occ[h] - s);
@@ -855,12 +992,26 @@ function deconv(occ, los) {
   return arr;
 }
 
+// Each add line inherits its scheme's target area unless it names its own.
 function activeLevers(fam) {
   const out = [];
-  for (const lv of state.future.levers) if (lv.on && lv.fam === fam) for (const a of lv.add) out.push(a);
+  for (const lv of state.future.levers) {
+    if (!lv.on || lv.kind === "space" || lv.fam !== fam) continue;
+    for (const a of lv.add || []) out.push({...a, area: (a.area != null && a.area !== "") ? a.area : (lv.area || "")});
+  }
   return out;
 }
-
+// extra physical spaces per area: enabled space levers plus the ad-hoc dials
+function activeSpaceAdditions() {
+  const out = {};
+  const deltas = state.future.areaSpaceDeltas || {};
+  for (const k of Object.keys(deltas)) out[k] = Number(deltas[k]) || 0;
+  for (const lv of state.future.levers) {
+    if (!lv.on || lv.kind !== "space" || !lv.area) continue;
+    out[lv.area] = (out[lv.area] || 0) + (Number(lv.addSpaces) || 0);
+  }
+  return out;
+}
 // custom capacity lines pulled from current state: only the change vs the pulled-in baseline counts
 function customAdditionLines(fam) {
   return state.future.customCapacity[fam]
@@ -868,98 +1019,270 @@ function customAdditionLines(fam) {
     .filter(r => Math.abs(r.n) > 1e-9);
 }
 
+// How much an area's demand moves in the future state. A per-source multiplier
+// reaches an area through that area's own referral mix, so scaling hot clinics
+// scales the hot clinic rooms and nothing else. An area with no mix moves on the
+// overall dial alone.
+function areaDemandScale(area) {
+  let base = 0, fut = 0;
+  for (const [k] of SOURCES) {
+    const v = Number(area.sources[k]) || 0;
+    base += v;
+    fut += v * (state.future.srcMult[k] != null ? state.future.srcMult[k] : 1);
+  }
+  if (base <= 0) return state.future.demandMult;
+  return (fut / base) * state.future.demandMult;
+}
+
+// demand over capacity, with the no-cover convention: demand with no capacity at
+// all is infinite pressure, not a divide by zero
+function pressure(demand, cap) {
+  if (cap > PRESSURE_EPS) return [demand / cap, false];
+  if (demand > PRESSURE_EPS) return [Infinity, true];
+  return [0, false];
+}
+
+function peakOf(vals) {
+  let peak = 0, peakH = 0;
+  vals.forEach((v, h) => { if (v > peak) { peak = v; peakH = h; } });
+  return [peak, peakH];
+}
+
 // ---------- model ----------
 function computeState(future) {
-  const occBase = (state.weekendView ? state.demand.we : state.demand.wd).slice();
-  const arrBase = deconv(occBase, state.meanLos);
-  let occ = occBase, arr = arrBase;
+  const areas = state.areas;
   let medLines = state.capacity.med, nurLines = state.capacity.nur;
-
+  let spaceExtra = {};
   if (future) {
-    const s = state.sources, m = state.future.srcMult;
-    const base = s.edPull + s.gp + s.followup + s.oneoneone + s.hotClinic || 1;
-    const fut = s.edPull * m.edPull + s.gp * m.gp + s.followup * m.followup + s.oneoneone * m.oneoneone + s.hotClinic * m.hotClinic;
-    const dscale = (fut / base) * state.future.demandMult;
-    // C4C diverts a share of demand away from the physical footprint (treated before hospital) — reduces patients present only
-    const c4c = 1 - clamp(state.future.c4cPct || 0, 0, 100) / 100;
-    occ = occBase.map(v => v * dscale * state.future.losMult * c4c);
-    arr = arrBase.map(v => v * dscale);
     medLines = medLines.concat(activeLevers("med")).concat(customAdditionLines("med"));
     nurLines = nurLines.concat(activeLevers("nur")).concat(customAdditionLines("nur"));
+    spaceExtra = activeSpaceAdditions();
   }
 
-  const medCap = medCapacity(medLines);
-  const nurCap = nurCapacity(nurLines);
-
-  // zero demand and capacity outside the operating window
-  for (let h = 0; h < 24; h++) {
-    if (inWindow(h)) continue;
-    occ[h] = 0; arr[h] = 0; medCap[h] = 0; nurCap[h] = 0;
+  // ---- per-area demand ----
+  // Arrivals are deconvolved from the UNSCALED curve and then scaled, and C4C
+  // reduces patients present but NOT arrivals: both asymmetries are deliberate.
+  const c4c = future ? 1 - clamp(state.future.c4cPct || 0, 0, 100) / 100 : 1;
+  const occA = {}, arrA = {};
+  for (const area of areas) {
+    const baseOcc = (state.weekendView ? area.demand.we : area.demand.wd).slice();
+    const baseArr = deconv(baseOcc, state.meanLos);
+    if (future) {
+      const dscale = areaDemandScale(area);
+      occA[area.id] = baseOcc.map(v => v * dscale * state.future.losMult * c4c);
+      arrA[area.id] = baseArr.map(v => v * dscale);
+    } else {
+      occA[area.id] = baseOcc;
+      arrA[area.id] = baseArr;
+    }
+    for (let h = 0; h < HOURS; h++) {
+      if (inWindow(h)) continue;
+      occA[area.id][h] = 0; arrA[area.id][h] = 0;
+    }
   }
 
-  // medical queue — single daily pass (SDEC resets each day). Store both the
-  // backlog entering each hour (carried over from the previous hour, before
-  // this hour's arrivals and capacity act) and the backlog leaving each hour
-  // (after) — medical pressure below uses the queue entering the hour.
-  const queueEnter = new Array(24).fill(0);
-  const queue = new Array(24).fill(0); // queue leaving each hour
-  let q = 0;
-  for (let h = 0; h < 24; h++) {
-    queueEnter[h] = q;
-    q = Math.max(0, q + arr[h] - medCap[h]);
-    queue[h] = q;
+  // ---- per-area and floating capacity ----
+  const ownMed = {}, ownNur = {}, spaceCap = {}, spacesTotal = {};
+  for (const area of areas) {
+    ownMed[area.id] = medCapacity(linesForArea(medLines, area.id));
+    ownNur[area.id] = nurCapacity(linesForArea(nurLines, area.id));
+    const total = Math.max(0, areaSpaces(area) + (spaceExtra[area.id] || 0));
+    spacesTotal[area.id] = total;
+    spaceCap[area.id] = Array.from({length: HOURS}, (_, h) => inWindow(h) ? total : 0);
+  }
+  const floatMed = medCapacity(linesForArea(medLines, ""));
+  const floatNur = nurCapacity(linesForArea(nurLines, ""));
+
+  // ---- hour by hour, all areas at once ----
+  // The floating pool has to be shared out before each area's queue can roll
+  // forward, so the hours are walked jointly rather than area by area.
+  const allocMed = {}, allocNur = {}, medCap = {}, nurCap = {}, queue = {}, queueEnter = {}, carried = {};
+  for (const area of areas) {
+    allocMed[area.id] = new Array(HOURS).fill(0);
+    allocNur[area.id] = new Array(HOURS).fill(0);
+    medCap[area.id] = new Array(HOURS).fill(0);
+    nurCap[area.id] = new Array(HOURS).fill(0);
+    queue[area.id] = new Array(HOURS).fill(0);
+    queueEnter[area.id] = new Array(HOURS).fill(0);
+    carried[area.id] = 0;
+  }
+  for (let h = 0; h < HOURS; h++) {
+    const demands = {};
+    let totalDemand = 0, totalOcc = 0;
+    for (const area of areas) {
+      demands[area.id] = arrA[area.id][h] + carried[area.id];
+      totalDemand += demands[area.id];
+      totalOcc += occA[area.id][h];
+    }
+    for (const area of areas) {
+      const shareMed = totalDemand > PRESSURE_EPS ? demands[area.id] / totalDemand : 0;
+      const shareNur = totalOcc > PRESSURE_EPS ? occA[area.id][h] / totalOcc : 0;
+      allocMed[area.id][h] = floatMed[h] * shareMed;
+      allocNur[area.id][h] = floatNur[h] * shareNur;
+      medCap[area.id][h] = ownMed[area.id][h] + allocMed[area.id][h];
+      nurCap[area.id][h] = ownNur[area.id][h] + allocNur[area.id][h];
+      queueEnter[area.id][h] = carried[area.id];
+      carried[area.id] = Math.max(0, demands[area.id] - medCap[area.id][h]);
+      queue[area.id][h] = carried[area.id];
+    }
   }
 
-  // Medical capacity is a flow measure (patients assessed per hour); nursing capacity is a
-  // concurrency measure (patients safely managed at one time). They are never added together.
-  // Each hour is scored independently, then classified by whichever (if either) is constrained.
-  const PRESSURE_EPS = 1e-6;
-  const medPressure = new Array(24).fill(0);
-  const nurPressure = new Array(24).fill(0);
-  const overallPressure = new Array(24).fill(0);
-  const medNoCover = new Array(24).fill(false);
-  const nurNoCover = new Array(24).fill(false);
-  const hourClass = new Array(24).fill("closed");
-  const hourCounts = {within: 0, medical: 0, nursing: 0, both: 0, closed: 0};
-  for (let h = 0; h < 24; h++) {
+  // ---- per-area results ----
+  const areaResults = areas.map(area => areaResult(area, occA[area.id], arrA[area.id],
+    ownMed[area.id], allocMed[area.id], medCap[area.id], ownNur[area.id], allocNur[area.id],
+    nurCap[area.id], spaceCap[area.id], queue[area.id], queueEnter[area.id], spacesTotal[area.id]));
+
+  // ---- floor-wide roll-up ----
+  const sumOf = get => Array.from({length: HOURS}, (_, h) => areaResults.reduce((a, r) => a + get(r)[h], 0));
+  const occ = sumOf(r => r.occ);
+  const arr = sumOf(r => r.arr);
+  const ownMedSum = sumOf(r => r.ownMedCap);
+  const ownNurSum = sumOf(r => r.ownNurCap);
+  const floorMedCap = ownMedSum.map((v, h) => v + floatMed[h]);
+  const floorNurCap = ownNurSum.map((v, h) => v + floatNur[h]);
+  const floorSpaceCap = sumOf(r => r.spaceCap);
+  const floorQueue = sumOf(r => r.queue);
+  const floorQueueEnter = sumOf(r => r.queueEnter);
+
+  const medPressure = new Array(HOURS).fill(0);
+  const nurPressure = new Array(HOURS).fill(0);
+  const spacePressure = new Array(HOURS).fill(0);
+  const overallPressure = new Array(HOURS).fill(0);
+  const medNoCover = new Array(HOURS).fill(false);
+  const nurNoCover = new Array(HOURS).fill(false);
+  const hourClass = new Array(HOURS).fill("closed");
+  const hourCounts = emptyHourCounts();
+  for (let h = 0; h < HOURS; h++) {
     if (!inWindow(h)) { hourClass[h] = "closed"; hourCounts.closed++; continue; }
-    const medDemand = arr[h] + queueEnter[h];
-    if (medCap[h] > PRESSURE_EPS) medPressure[h] = medDemand / medCap[h];
-    else if (medDemand > PRESSURE_EPS) { medPressure[h] = Infinity; medNoCover[h] = true; }
-    else medPressure[h] = 0;
-    if (nurCap[h] > PRESSURE_EPS) nurPressure[h] = occ[h] / nurCap[h];
-    else if (occ[h] > PRESSURE_EPS) { nurPressure[h] = Infinity; nurNoCover[h] = true; }
-    else nurPressure[h] = 0;
-    overallPressure[h] = Math.max(medPressure[h], nurPressure[h]);
-    const medBad = medPressure[h] > 1 + PRESSURE_EPS;
-    const nurBad = nurPressure[h] > 1 + PRESSURE_EPS;
-    const cls = medBad && nurBad ? "both" : medBad ? "medical" : nurBad ? "nursing" : "within";
+    [medPressure[h], medNoCover[h]] = pressure(arr[h] + floorQueueEnter[h], floorMedCap[h]);
+    [nurPressure[h], nurNoCover[h]] = pressure(occ[h], floorNurCap[h]);
+    [spacePressure[h]] = pressure(occ[h], floorSpaceCap[h]);
+    overallPressure[h] = Math.max(medPressure[h], nurPressure[h], spacePressure[h]);
+    const cls = classifyHour(medPressure[h] > 1 + PRESSURE_EPS, nurPressure[h] > 1 + PRESSURE_EPS,
+      spacePressure[h] > 1 + PRESSURE_EPS);
     hourClass[h] = cls;
     hourCounts[cls]++;
   }
-  const hConstrained = hourCounts.medical + hourCounts.nursing + hourCounts.both;
+  const hConstrained = constrainedCount(hourCounts);
 
   const attend = arr.reduce((a, b) => a + b, 0);
   const pth = occ.reduce((a, b) => a + b, 0);
-  let peak = 0, peakH = 0;
-  occ.forEach((v, h) => { if (v > peak) { peak = v; peakH = h; } });
-  let nurUtil = 0, nurOverHrs = 0, nurPeakOver = 0, nurPeakOverH = 0;
-  for (let h = 0; h < 24; h++) {
+  const [peak, peakH] = peakOf(occ);
+  let nurUtil = 0, nurOverHrs = 0, nurPeakOver = 0, nurPeakOverH = 0, spaceUtil = 0;
+  for (let h = 0; h < HOURS; h++) {
     if (!inWindow(h)) continue;
-    if (nurCap[h] > 0) nurUtil = Math.max(nurUtil, occ[h] / nurCap[h]);
-    if (occ[h] > nurCap[h] + 1e-6) nurOverHrs++;
-    const over = occ[h] - nurCap[h];
+    if (floorNurCap[h] > 0) nurUtil = Math.max(nurUtil, occ[h] / floorNurCap[h]);
+    if (floorSpaceCap[h] > 0) spaceUtil = Math.max(spaceUtil, occ[h] / floorSpaceCap[h]);
+    if (occ[h] > floorNurCap[h] + 1e-6) nurOverHrs++;
+    const over = occ[h] - floorNurCap[h];
     if (over > nurPeakOver) { nurPeakOver = over; nurPeakOverH = h; }
   }
-  const medCapDay = medCap.reduce((a, b) => a + b, 0);
+  const medCapDay = floorMedCap.reduce((a, b) => a + b, 0);
   const medUtil = medCapDay > 0 ? attend / medCapDay : 0;
+  const peakQueue = Math.max(...floorQueue);
+  let queueH = 0; floorQueue.forEach((v, h) => { if (v === peakQueue) queueH = h; });
+
+  return {occ, arr, medCap: floorMedCap, nurCap: floorNurCap, spaceCap: floorSpaceCap,
+    queue: floorQueue, queueEnter: floorQueueEnter, attend, pth, peak, peakH,
+    nurUtil, nurOverHrs, nurPeakOver, nurPeakOverH, medUtil, medCapDay, spaceUtil, peakQueue, queueH,
+    medPressure, nurPressure, spacePressure, overallPressure, medNoCover, nurNoCover,
+    hourClass, hourCounts, hConstrained, areas: areaResults};
+}
+
+// Score one area's hours once its capacity and queue are known.
+function areaResult(area, occ, arr, ownMedCap, allocMedCap, medCap, ownNurCap, allocNurCap,
+                    nurCap, spaceCap, queue, queueEnter, physicalSpaces) {
+  const medPressure = new Array(HOURS).fill(0);
+  const nurPressure = new Array(HOURS).fill(0);
+  const spacePressure = new Array(HOURS).fill(0);
+  const overallPressure = new Array(HOURS).fill(0);
+  const medNoCover = new Array(HOURS).fill(false);
+  const nurNoCover = new Array(HOURS).fill(false);
+  const holdCap = new Array(HOURS).fill(0);
+  const nurseManaged = new Array(HOURS).fill(false);
+  const hourClass = new Array(HOURS).fill("closed");
+  const hourCounts = emptyHourCounts();
+
+  for (let h = 0; h < HOURS; h++) {
+    // An area is subject to a nursing holding constraint if it is declared a
+    // nursing/concurrency area, or if nurses who hold patients are actually
+    // rostered there this hour. Its holding ceiling is then capped at its spaces.
+    nurseManaged[h] = !!area.nursingRole || nurCap[h] > PRESSURE_EPS;
+    holdCap[h] = nurseManaged[h] ? Math.min(nurCap[h], spaceCap[h]) : spaceCap[h];
+    if (!inWindow(h)) { hourClass[h] = "closed"; hourCounts.closed++; continue; }
+    [medPressure[h], medNoCover[h]] = pressure(arr[h] + queueEnter[h], medCap[h]);
+    if (nurseManaged[h]) [nurPressure[h], nurNoCover[h]] = pressure(occ[h], nurCap[h]);
+    [spacePressure[h]] = pressure(occ[h], spaceCap[h]);
+    overallPressure[h] = Math.max(medPressure[h], nurPressure[h], spacePressure[h]);
+    const cls = classifyHour(medPressure[h] > 1 + PRESSURE_EPS, nurPressure[h] > 1 + PRESSURE_EPS,
+      spacePressure[h] > 1 + PRESSURE_EPS);
+    hourClass[h] = cls;
+    hourCounts[cls]++;
+  }
+
+  const attend = arr.reduce((a, b) => a + b, 0);
+  const pth = occ.reduce((a, b) => a + b, 0);
+  const medCapDay = medCap.reduce((a, b) => a + b, 0);
+  const [peak, peakH] = peakOf(occ);
+  let nurUtil = 0, spaceUtil = 0;
+  for (let h = 0; h < HOURS; h++) {
+    if (!inWindow(h)) continue;
+    if (nurCap[h] > 0) nurUtil = Math.max(nurUtil, occ[h] / nurCap[h]);
+    if (spaceCap[h] > 0) spaceUtil = Math.max(spaceUtil, occ[h] / spaceCap[h]);
+  }
   const peakQueue = Math.max(...queue);
   let queueH = 0; queue.forEach((v, h) => { if (v === peakQueue) queueH = h; });
 
-  return {occ, arr, medCap, nurCap, queue, queueEnter, attend, pth, peak, peakH, nurUtil, nurOverHrs, nurPeakOver, nurPeakOverH,
-    medUtil, medCapDay, peakQueue, queueH,
-    medPressure, nurPressure, overallPressure, medNoCover, nurNoCover, hourClass, hourCounts, hConstrained};
+  return {areaId: area.id, name: area.name, nursingRole: !!area.nursingRole, nurseManaged,
+    occ, arr, ownMedCap, allocMedCap, medCap, ownNurCap, allocNurCap, nurCap, spaceCap, holdCap,
+    queue, queueEnter, medPressure, nurPressure, spacePressure, overallPressure,
+    medNoCover, nurNoCover, hourClass, hourCounts, hConstrained: constrainedCount(hourCounts),
+    physicalSpaces, attend, pth, peak, peakH, medUtil: medCapDay > 0 ? attend / medCapDay : 0,
+    medCapDay, nurUtil, spaceUtil, peakQueue, queueH, hasDemand: pth > PRESSURE_EPS};
 }
+
+// every active staffing lever and custom capacity edit, each with its net WTE
+// change (+ addition / - removal) and, where set, its own cost per WTE
+function capacityAdditionRows() {
+  const rows = [];
+  for (const lv of state.future.levers) {
+    if (!lv.on || lv.kind === "space") continue;
+    const wte = (lv.add || []).reduce((a, l) => a + (l.n || 0), 0);
+    rows.push({label: lv.name + " (preset)", fam: lv.fam, wte, area: lv.area || ""});
+  }
+  for (const fam of ["med", "nur"]) {
+    for (const r of state.future.customCapacity[fam]) {
+      const added = (r.n || 0) - (r.baseN || 0);
+      if (Math.abs(added) > 1e-9) rows.push({label: r.label, fam, wte: added, cost: r.cost, area: r.area || ""});
+    }
+  }
+  return rows;
+}
+// every future-state change to an area's physical footprint. Space carries no
+// staffing cost here - capital and estates cost is out of scope.
+function spaceAdditionRows() {
+  const rows = [];
+  for (const lv of state.future.levers) {
+    if (!lv.on || lv.kind !== "space" || !lv.area) continue;
+    const spaces = Number(lv.addSpaces) || 0;
+    if (Math.abs(spaces) > 1e-9) rows.push({label: lv.name + " (preset)", area: lv.area, spaces});
+  }
+  const deltas = state.future.areaSpaceDeltas || {};
+  for (const k of Object.keys(deltas)) {
+    const v = Number(deltas[k]) || 0;
+    if (Math.abs(v) > 1e-9) rows.push({label: (areaNameOf(k) || k) + " — space change", area: k, spaces: v});
+  }
+  return rows;
+}
+function areaNameOf(areaKey) {
+  if (!areaKey) return "Floating";
+  const a = state.areas.find(x => x.id === areaKey);
+  return a ? a.name : areaKey;
+}
+// ======================================================================
+// MODEL CORE END
+// ======================================================================
+
 
 // ---------- charts (shared with the ED model) ----------
 function lineChart(el, series, opts) {
@@ -1105,7 +1428,7 @@ function refreshScrollHint(tableId) {
         hint.className = "table-scroll-hint";
         wrap.insertAdjacentElement("afterend", hint);
       }
-      hint.textContent = "Scroll sideways to see every column, including Days and Remove.";
+      hint.textContent = "Scroll sideways to see every column.";
     } else {
       wrap.removeAttribute("tabindex");
       wrap.removeAttribute("aria-label");
@@ -1114,24 +1437,39 @@ function refreshScrollHint(tableId) {
   });
 }
 function refreshAllScrollHints() {
-  ["cap-med", "cap-nur", "future-cap-med", "future-cap-nur"].forEach(refreshScrollHint);
+  document.querySelectorAll("table.roster-table[id]").forEach(t => refreshScrollHint(t.id));
 }
 
-// ---------- capacity editors ----------
+// ---------- capacity editors: one roster per area, plus a floating pool ----------
 // group shift lines by day-type so a weekday-only line is never confused with a weekend-only or every-day line
 const DAY_GROUPS = [["all", "Every day"], ["wd", "Weekday only"], ["we", "Weekend only"]];
+
+// A stable, id-safe suffix for the per-area table element ids.
+function areaSlug(areaKey) { return areaKey ? String(areaKey).replace(/[^a-zA-Z0-9_-]/g, "-") : "floating"; }
+function capTableId(fam, areaKey) { return "cap-" + fam + "-" + areaSlug(areaKey); }
+
+// <option> list for every "which area is this line in?" dropdown
+function areaOptionsHtml(selected, floatingLabel) {
+  const sel = selected == null ? "" : String(selected);
+  let html = `<option value=""${sel === "" ? " selected" : ""}>${floatingLabel || "Floating / unassigned"}</option>`;
+  for (const ar of state.areas) {
+    html += `<option value="${esc(ar.id)}"${sel === ar.id ? " selected" : ""}>${esc(ar.name)}</option>`;
+  }
+  return html;
+}
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 function capRowHtml(fam, i, r) {
   const rateCell = fam === "med"
     ? `<td><input type="number" min="0" step="0.05" value="${r.rate}" data-cap="${fam}.${i}.rate"></td>`
     : `<td style="text-align:center"><input type="checkbox" ${r.bay ? "checked" : ""} data-cap="${fam}.${i}.bay"></td>`
       + `<td><input type="number" min="0" step="0.5" value="${r.rate}" data-cap="${fam}.${i}.rate"></td>`;
-  const label = String(r.label).replace(/"/g, "&quot;");
+  const label = esc(r.label);
   return `<tr>
     <td><input type="text" value="${label}" data-cap="${fam}.${i}.label"></td>
     <td><input type="number" min="0" step="1" value="${r.n}" data-cap="${fam}.${i}.n"></td>
     ${rateCell}
-    <td><input type="number" min="0" step="500" style="width:84px" value="${Number.isFinite(r.cost) ? r.cost : ""}" data-cap="${fam}.${i}.cost" title="Indicative annual cost per WTE for this line — overrides the global assumption below"></td>
+    <td><input type="number" min="0" step="500" style="width:84px" value="${Number.isFinite(r.cost) ? r.cost : ""}" data-cap="${fam}.${i}.cost" title="Indicative annual cost per WTE for this line — overrides the global assumption"></td>
     <td><input type="time" value="${r.s}" data-cap="${fam}.${i}.s"></td>
     <td><input type="time" value="${r.e}" data-cap="${fam}.${i}.e"></td>
     <td><select data-cap="${fam}.${i}.days">
@@ -1139,52 +1477,153 @@ function capRowHtml(fam, i, r) {
       <option value="wd"${r.days === "wd" ? " selected" : ""}>Weekday</option>
       <option value="we"${r.days === "we" ? " selected" : ""}>Weekend</option>
     </select></td>
+    <td><select data-cap="${fam}.${i}.area" aria-label="Area for ${label}">${areaOptionsHtml(r.area)}</select></td>
     <td><button class="btn-x" data-cap-del="${fam}.${i}" type="button" aria-label="Remove ${label} line"><span class="x-icon" aria-hidden="true">&#10005;</span><span>Remove</span></button></td>
   </tr>`;
 }
-function renderCapEditor(fam, elId) {
+
+// Renders only the lines tagged to `areaKey`, but keeps each row's real index in
+// the flat state.capacity[fam] array, so edits/deletes need no index translation.
+function renderCapEditor(fam, areaKey) {
+  const elId = capTableId(fam, areaKey);
   const el = document.getElementById(elId);
+  if (!el) return;
   const cols = fam === "med"
     ? `<th scope="col">Patients assessed per clinician per hour</th>`
-    : `<th scope="col">Bay?</th><th scope="col">Patients safely managed per nurse</th>`;
-  const colspan = fam === "med" ? 8 : 9;
+    : `<th scope="col">Holds patients?</th><th scope="col">Patients safely held per nurse</th>`;
+  const colspan = fam === "med" ? 9 : 10;
   const rows = state.capacity[fam];
-  let body = "";
-  for (const [key, groupLabel] of DAY_GROUPS) {
-    const idxs = rows.map((_, i) => i).filter(i => rows[i].days === key);
-    if (!idxs.length) continue;
-    body += `<tr class="group-row"><td colspan="${colspan}">${groupLabel}</td></tr>` +
-      idxs.map(i => capRowHtml(fam, i, rows[i])).join("");
+  const mine = rows.map((_, i) => i).filter(i => (rows[i].area || "") === areaKey);
+  const header = `<tr><th scope="col">Staff</th><th scope="col">WTE</th>${cols}<th scope="col">Cost/WTE (£/yr)</th><th scope="col">Start</th><th scope="col">End</th><th scope="col">Days</th><th scope="col">Area</th><th scope="col"><span class="sr-only">Actions</span></th></tr>`;
+  if (!mine.length) {
+    el.innerHTML = header + `<tr><td colspan="${colspan}" style="color:var(--muted)">No ${fam === "med" ? "clinical" : "nursing"} lines here yet.</td></tr>`;
+  } else {
+    let body = "";
+    for (const [key, groupLabel] of DAY_GROUPS) {
+      const idxs = mine.filter(i => rows[i].days === key);
+      if (!idxs.length) continue;
+      body += `<tr class="group-row"><td colspan="${colspan}">${groupLabel}</td></tr>` +
+        idxs.map(i => capRowHtml(fam, i, rows[i])).join("");
+    }
+    el.innerHTML = header + body;
   }
-  el.innerHTML = `<tr><th scope="col">Staff</th><th scope="col">WTE</th>${cols}<th scope="col">Cost/WTE (£/yr)</th><th scope="col">Start</th><th scope="col">End</th><th scope="col">Days</th><th scope="col"><span class="sr-only">Actions</span></th></tr>` + body;
   el.querySelectorAll("[data-cap]").forEach(inp => {
     const ev = inp.type === "checkbox" ? "change" : "input";
     inp.addEventListener(ev, () => {
       const [f, i, k] = inp.dataset.cap.split(".");
       const row = state.capacity[f][Number(i)];
       if (k === "bay") row[k] = inp.checked;
-      else if (k === "label" || k === "s" || k === "e" || k === "days") row[k] = inp.value;
+      else if (k === "label" || k === "s" || k === "e" || k === "days" || k === "area") row[k] = inp.value;
       else { const v = Number(inp.value); if (Number.isFinite(v)) row[k] = v; }
-      if (k === "days") { renderCapEditor(f, elId); }
+      // a day-type or area change moves the row to a different group or table
+      if (k === "days") renderCapEditor(f, areaKey);
+      else if (k === "area") renderAllRosters();
       renderAll();
     });
   });
   el.querySelectorAll("[data-cap-del]").forEach(btn => btn.addEventListener("click", () => {
     const [f, i] = btn.dataset.capDel.split(".");
     state.capacity[f].splice(Number(i), 1);
-    renderCapEditor(f, elId); renderAll();
+    renderAllRosters();
+    renderAll();
   }));
   refreshScrollHint(elId);
 }
+
+// The Step 1 area cards: physical spaces, then the two rosters, per area, plus
+// the floating pool. Rebuilt wholesale whenever the set of areas changes.
+function renderAreaCards() {
+  const wrap = document.getElementById("area-cards");
+  if (!wrap) return;
+  const openState = {};
+  wrap.querySelectorAll("details[data-area-card]").forEach(d => { openState[d.dataset.areaCard] = d.open; });
+
+  const card = (areaKey, title, note, spacesHtml, extraSummary) => `
+    <details class="drawer" data-area-card="${esc(areaKey || "floating")}"${openState[areaKey || "floating"] !== false ? " open" : ""}>
+      <summary><span class="area-head"><span>${title}</span><span class="area-spaces" data-area-summary="${esc(areaKey)}">${extraSummary}</span></span></summary>
+      <div class="drawer-body">
+        <p class="area-note">${note}</p>
+        ${spacesHtml}
+        <div class="roster-sub">Medical / clinical</div>
+        <div class="table-wrap"><table class="roster-table" id="${capTableId("med", areaKey)}"></table></div>
+        <p style="margin:8px 0 0"><button class="btn-small" type="button" data-add-line="med|${esc(areaKey)}">+ Add clinical line</button></p>
+        <div class="roster-sub">Nursing</div>
+        <div class="table-wrap"><table class="roster-table" id="${capTableId("nur", areaKey)}"></table></div>
+        <p style="margin:8px 0 0"><button class="btn-small" type="button" data-add-line="nur|${esc(areaKey)}">+ Add nursing line</button></p>
+      </div>
+    </details>`;
+
+  let html = "";
+  for (const ar of state.areas) {
+    const spacesHtml = `<div class="space-fields">
+      <div class="field"><label for="sp-t-${esc(ar.id)}">Trolleys</label><input id="sp-t-${esc(ar.id)}" type="number" min="0" step="1" value="${ar.trolleys}" data-area="${esc(ar.id)}.trolleys"></div>
+      <div class="field"><label for="sp-c-${esc(ar.id)}">Chairs</label><input id="sp-c-${esc(ar.id)}" type="number" min="0" step="1" value="${ar.chairs}" data-area="${esc(ar.id)}.chairs"></div>
+      <div class="field"><label for="sp-r-${esc(ar.id)}">Rooms</label><input id="sp-r-${esc(ar.id)}" type="number" min="0" step="1" value="${ar.rooms}" data-area="${esc(ar.id)}.rooms"></div>
+      <div class="toggle-row" style="margin:0 0 4px">
+        <label class="switch"><input type="checkbox" ${ar.nursingRole ? "checked" : ""} data-area="${esc(ar.id)}.nursingRole" aria-label="Nurses hold patients in ${esc(ar.name)}"><span class="track"></span></label>
+        <span>Nurses <strong>hold patients</strong> here — apply a patients-per-nurse holding capacity, capped at the spaces above</span>
+      </div>
+    </div>`;
+    const tag = ar.placeholderDemand ? ` <span class="placeholder-tag">placeholder</span>` : "";
+    html += card(ar.id, esc(ar.name) + tag, esc(ar.note || ""), spacesHtml, "");
+  }
+  html += card("", "Floating / unassigned",
+    "Staff who circulate rather than sitting in one area — floor-wide co-ordinator, hello, in-reach and triage roles, and (by default) every clinician. They count towards floor-wide capacity, and for the per-area view they are attributed to areas each hour in proportion to that area&rsquo;s demand. Tag a line to an area only when that person genuinely works there and nowhere else.",
+    "", "");
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll("[data-area]").forEach(inp => {
+    const ev = inp.type === "checkbox" ? "change" : "input";
+    inp.addEventListener(ev, () => {
+      const [id, key] = inp.dataset.area.split(".");
+      const ar = state.areas.find(x => x.id === id);
+      if (!ar) return;
+      if (key === "nursingRole") ar[key] = inp.checked;
+      else { const v = Number(inp.value); if (Number.isFinite(v) && v >= 0) ar[key] = v; }
+      renderAll();
+    });
+  });
+  wrap.querySelectorAll("[data-add-line]").forEach(btn => btn.addEventListener("click", () => {
+    const [fam, areaKey] = btn.dataset.addLine.split("|");
+    if (fam === "med") {
+      state.capacity.med.push({label: "New clinical line", n: 1, rate: 0.6, cost: state.costMedWTE, s: "09:00", e: "17:00", days: "all", area: areaKey});
+    } else {
+      const ar = state.areas.find(x => x.id === areaKey);
+      state.capacity.nur.push({label: "New nursing line", n: 1, rate: 4, cost: state.costNurWTE, s: "08:00", e: "20:30", days: "all", bay: !!(ar && ar.nursingRole), area: areaKey});
+    }
+    renderAllRosters();
+    renderAll();
+  }));
+  renderAllRosters();
+}
+
+// (Re)draw every per-area roster table from the flat capacity arrays.
+function renderAllRosters() {
+  for (const ar of state.areas) { renderCapEditor("med", ar.id); renderCapEditor("nur", ar.id); }
+  renderCapEditor("med", "");
+  renderCapEditor("nur", "");
+  refreshAreaSummaries();
+}
+
+// The per-area headline in each card summary: spaces and the WTE tagged there.
+function refreshAreaSummaries() {
+  document.querySelectorAll("[data-area-summary]").forEach(el => {
+    const key = el.dataset.areaSummary || "";
+    const wte = ["med", "nur"].reduce((a, fam) =>
+      a + state.capacity[fam].filter(r => (r.area || "") === key && lineActive(r)).reduce((s, r) => s + (Number(r.n) || 0), 0), 0);
+    const dayLabel = state.weekendView ? "weekend" : "weekday";
+    if (!key) { el.textContent = `${f1(wte)} WTE on shift (${dayLabel})`; return; }
+    const ar = state.areas.find(x => x.id === key);
+    if (!ar) return;
+    const bits = [];
+    if (ar.trolleys) bits.push(`${f0(ar.trolleys)} trolleys`);
+    if (ar.chairs) bits.push(`${f0(ar.chairs)} chairs`);
+    if (ar.rooms) bits.push(`${f0(ar.rooms)} rooms`);
+    el.textContent = `${f0(areaSpaces(ar))} spaces (${bits.join(" + ") || "none set"}) · ${f1(wte)} WTE on shift (${dayLabel})`;
+  });
+}
+
 function initCapEditors() {
-  document.getElementById("add-med").addEventListener("click", () => {
-    state.capacity.med.push({label: "New clinical line", n: 1, rate: 0.6, cost: state.costMedWTE, s: "09:00", e: "17:00", days: "all"});
-    renderCapEditor("med", "cap-med"); renderAll();
-  });
-  document.getElementById("add-nur").addEventListener("click", () => {
-    state.capacity.nur.push({label: "New nursing line", n: 1, rate: 4, cost: state.costNurWTE, s: "08:00", e: "20:30", days: "all", bay: true});
-    renderCapEditor("nur", "cap-nur"); renderAll();
-  });
   document.getElementById("weekend-view").addEventListener("change", e => setWeekend(e.target.checked));
   document.getElementById("weekend-view-2").addEventListener("change", e => setWeekend(e.target.checked));
 }
@@ -1194,9 +1633,10 @@ function setWeekend(val) {
   const a = document.getElementById("weekend-view"), b = document.getElementById("weekend-view-2");
   if (a) a.checked = val;
   if (b) b.checked = val;
-  renderDemandGrid();
+  renderDemandMatrix();
   renderAll();
 }
+
 
 // ---------- demand-vs-capacity panels (medical / nursing / overall service) ----------
 function medSeries(st, cmp) {
@@ -1211,7 +1651,8 @@ function medSeries(st, cmp) {
 function nurSeries(st, cmp) {
   const series = [
     {name: "Patients present", vals: st.occ, color: "var(--aqua)"},
-    {name: "Nursing capacity", vals: st.nurCap, color: "var(--ink-2)"},
+    {name: "Nursing holding capacity", vals: st.nurCap, color: "var(--ink-2)"},
+    {name: "Physical spaces", vals: st.spaceCap, color: "var(--violet)", dash: true},
   ];
   if (cmp) series.push({name: "Present today", vals: cmp.occ, color: "var(--muted)", dash: true});
   return series;
@@ -1231,43 +1672,69 @@ function renderLegend(elId, series) {
 }
 
 // ---------- overall service: hourly status strip ----------
-// Medical pressure and nursing pressure are never added together — each hour is
-// classified by whichever (if either) is constrained. Colour is never the only cue:
-// every segment also carries a text tag and a full accessible label.
+// Medical pressure (a flow measure), nursing pressure (a concurrency measure) and
+// physical space (a hard ceiling) are never added together — each hour is
+// classified by whichever of them, if any, is exceeded. A single exceeded
+// dimension keeps its own colour; any combination goes red. Colour is never the
+// only cue: every segment also carries a text tag and a full accessible label.
 const STATUS_META = {
-  within:  {label: "Within capacity",                     tag: "OK",     cls: "status-within"},
-  medical: {label: "Medical constraint",                  tag: "Med",    cls: "status-medical"},
-  nursing: {label: "Nursing constraint",                  tag: "Nurs",   cls: "status-nursing"},
-  both:    {label: "Medical and nursing both constrained", tag: "Both",  cls: "status-both"},
-  closed:  {label: "Closed",                              tag: "Closed", cls: "status-closed"},
+  "within":                {label: "Within capacity",                                  tag: "OK",       cls: "status-within"},
+  "medical":               {label: "Medical constraint",                               tag: "Med",      cls: "status-medical"},
+  "nursing":               {label: "Nursing constraint",                               tag: "Nurs",     cls: "status-nursing"},
+  "space":                 {label: "Physical space constraint",                        tag: "Space",    cls: "status-space"},
+  "medical+nursing":       {label: "Medical and nursing both constrained",             tag: "Med+Nurs", cls: "status-multi"},
+  "medical+space":         {label: "Medical and physical space both constrained",      tag: "Med+Sp",   cls: "status-multi"},
+  "nursing+space":         {label: "Nursing and physical space both constrained",      tag: "Nurs+Sp",  cls: "status-multi"},
+  "medical+nursing+space": {label: "Medical, nursing and physical space all constrained", tag: "All 3", cls: "status-multi"},
+  "closed":                {label: "Closed",                                           tag: "Closed",   cls: "status-closed"},
 };
+const STRIP_LEGEND = `<div class="legend">
+  <span class="key"><span class="swatch box" style="background:var(--good)"></span>Green — within capacity</span>
+  <span class="key"><span class="swatch box" style="background:var(--accent)"></span>Blue — medical constraint</span>
+  <span class="key"><span class="swatch box" style="background:var(--bad-2)"></span>Amber — nursing constraint</span>
+  <span class="key"><span class="swatch box" style="background:var(--violet)"></span>Violet — physical space constraint</span>
+  <span class="key"><span class="swatch box" style="background:var(--bad)"></span>Red — more than one constrained</span>
+  <span class="key"><span class="swatch box" style="background:var(--chip-bg)"></span>Grey — closed</span>
+  <span class="key"><span class="swatch box mx-nodata"></span>Hatched — no demand entered, nothing scored</span>
+</div>`;
+
 function pressureText(p, noCover) {
   if (noCover || p === Infinity || !Number.isFinite(p)) return "No cover";
   return f0(p * 100) + "%";
 }
+// the three pressure read-outs behind one cell, as plain text
+function cellPressures(st, h, nurseManaged) {
+  const closed = st.hourClass[h] === "closed";
+  if (closed) return {med: "n/a — closed", nur: "n/a — closed", space: "n/a — closed"};
+  return {
+    med: pressureText(st.medPressure[h], st.medNoCover[h]),
+    nur: nurseManaged === false ? "n/a — no nurses hold patients here" : pressureText(st.nurPressure[h], st.nurNoCover[h]),
+    space: pressureText(st.spacePressure[h], false),
+  };
+}
+
 function renderStatusStrip(el, st) {
   let segs = "";
-  for (let h = 0; h < 24; h++) {
+  for (let h = 0; h < HOURS; h++) {
     const cls = st.hourClass[h];
     const meta = STATUS_META[cls];
     const closed = cls === "closed";
     const noCover = !closed && (st.medNoCover[h] || st.nurNoCover[h]);
-    const medTxt = closed ? "n/a — closed" : pressureText(st.medPressure[h], st.medNoCover[h]);
-    const nurTxt = closed ? "n/a — closed" : pressureText(st.nurPressure[h], st.nurNoCover[h]);
+    const p = cellPressures(st, h);
     const tag = noCover ? "No cover" : meta.tag;
     const statusLabel = noCover ? meta.label + " — no cover" : meta.label;
     const hourLbl = String(h).padStart(2, "0") + ":00";
-    const aria = `${hourLbl}: ${statusLabel}. Medical pressure ${medTxt}. Nursing pressure ${nurTxt}.`;
-    segs += `<div class="status-seg ${meta.cls}" tabindex="0" data-hour="${hourLbl}" data-status="${statusLabel}" data-med="${medTxt}" data-nur="${nurTxt}" aria-label="${aria}">` +
+    const aria = `${hourLbl}: ${statusLabel}. Medical pressure ${p.med}. Nursing pressure ${p.nur}. Physical space ${p.space}.`;
+    segs += `<div class="status-seg ${meta.cls}" tabindex="0" data-hour="${hourLbl}" data-status="${esc(statusLabel)}" data-med="${esc(p.med)}" data-nur="${esc(p.nur)}" data-space="${esc(p.space)}" aria-label="${esc(aria)}">` +
       `<span class="status-hour">${String(h).padStart(2, "0")}</span><span class="status-tag">${tag}</span></div>`;
   }
   el.innerHTML = `<div class="status-strip" role="group" aria-label="Hourly service status, midnight to midnight">${segs}</div><div class="tooltip"></div>`;
   const tip = el.querySelector(".tooltip");
   el.querySelectorAll(".status-seg").forEach(seg => {
     const show = () => {
-      tip.innerHTML = `<strong>${seg.dataset.hour}</strong><br>Medical pressure: <strong>${seg.dataset.med}</strong><br>Nursing pressure: <strong>${seg.dataset.nur}</strong><br>Constraint: <strong>${seg.dataset.status}</strong>`;
+      tip.innerHTML = `<strong>${seg.dataset.hour}</strong><br>Medical pressure: <strong>${seg.dataset.med}</strong><br>Nursing pressure: <strong>${seg.dataset.nur}</strong><br>Physical space: <strong>${seg.dataset.space}</strong><br>Constraint: <strong>${seg.dataset.status}</strong>`;
       tip.style.display = "block";
-      tip.style.left = Math.max(0, Math.min(seg.offsetLeft, el.clientWidth - 200)) + "px";
+      tip.style.left = Math.max(0, Math.min(seg.offsetLeft, el.clientWidth - 220)) + "px";
       tip.style.top = Math.max(0, seg.offsetTop - tip.offsetHeight - 10) + "px";
     };
     const hide = () => { tip.style.display = "none"; };
@@ -1277,32 +1744,104 @@ function renderStatusStrip(el, st) {
     seg.addEventListener("blur", hide);
   });
 }
+
+// ---------- by area: small multiples, area rows x hour columns ----------
+// This is the view that stops a comfortable floor total hiding one area
+// overflowing: every area is scored against its own demand, roster and spaces.
+function renderAreaMatrix(el, st) {
+  const open = Math.max(0, Math.min(23, Math.round(state.openHour) || 0));
+  const close = Math.max(open + 1, Math.min(24, Math.round(state.closeHour) || 24));
+  let head = "";
+  for (let h = open; h < close; h++) head += `<th scope="col">${String(h).padStart(2, "0")}</th>`;
+  let body = "";
+  for (const ar of st.areas) {
+    let cells = "";
+    for (let h = open; h < close; h++) {
+      const cls = ar.hourClass[h];
+      const meta = STATUS_META[cls];
+      const p = cellPressures(ar, h, ar.nurseManaged[h]);
+      // An area with no demand entered has nothing to be within capacity OF —
+      // showing it green would be a reassurance the data does not support.
+      if (!ar.hasDemand && cls !== "closed") {
+        const t = `${ar.name} ${String(h).padStart(2, "0")}:00 — no demand entered for this area, so nothing is being scored. This is a gap in the data, not a quiet hour. Capacity here: ${f1(ar.medCap[h])} patients/hr seen, ${f0(ar.spaceCap[h])} spaces.`;
+        cells += `<td><div class="mx mx-nodata" tabindex="0" data-title="${esc(t)}" aria-label="${esc(t)}">—</div></td>`;
+        continue;
+      }
+      const title = `${ar.name} ${String(h).padStart(2, "0")}:00 — ${meta.label}. Medical ${p.med}. Nursing ${p.nur}. Physical space ${p.space} (${f1(ar.occ[h])} present in ${f0(ar.spaceCap[h])} spaces).`;
+      cells += `<td><div class="mx ${meta.cls.replace("status-", "mx-")}" tabindex="0" data-title="${esc(title)}" aria-label="${esc(title)}">${cls === "within" || cls === "closed" ? "" : meta.tag}</div></td>`;
+    }
+    const flag = ar.hasDemand ? "" : ` <span class="area-flag">no demand entered</span>`;
+    body += `<tr><th scope="row">${esc(ar.name)}${flag}</th>${cells}</tr>`;
+  }
+  el.innerHTML = `<div class="table-wrap"><table class="area-matrix"><thead><tr><th scope="col">Area</th>${head}</tr></thead><tbody>${body}</tbody></table></div>${STRIP_LEGEND}<div class="tooltip"></div>`;
+  const tip = el.querySelector(".tooltip");
+  el.querySelectorAll(".mx").forEach(cell => {
+    const show = () => {
+      tip.textContent = cell.dataset.title;
+      tip.style.display = "block";
+      tip.style.whiteSpace = "normal";
+      tip.style.maxWidth = "320px";
+      tip.style.left = Math.max(0, Math.min(cell.offsetLeft, el.clientWidth - 330)) + "px";
+      tip.style.top = Math.max(0, cell.offsetTop - tip.offsetHeight - 8) + "px";
+    };
+    const hide = () => { tip.style.display = "none"; };
+    cell.addEventListener("mouseenter", show);
+    cell.addEventListener("focus", show);
+    cell.addEventListener("mouseleave", hide);
+    cell.addEventListener("blur", hide);
+  });
+}
+
+// the numbers behind the matrix, one row per area
+function areaTableHtml(st) {
+  let body = "";
+  for (const ar of st.areas) {
+    const nurCell = (ar.nursingRole || Math.max(...ar.nurCap) > 0) ? f0(ar.nurUtil * 100) + "%" : "n/a";
+    const flag = ar.hasDemand ? "" : ` <span class="area-flag">placeholder — no demand entered</span>`;
+    body += `<tr><td>${esc(ar.name)}${flag}</td><td>${f0(ar.physicalSpaces)}</td><td>${f1(ar.attend)}</td>` +
+      `<td>${f1(ar.peak)}</td><td class="${ar.spaceUtil > 1.001 ? "neg" : ""}">${f0(ar.spaceUtil * 100)}%</td>` +
+      `<td class="${ar.nurUtil > 1.001 ? "neg" : ""}">${nurCell}</td><td>${f0(ar.medUtil * 100)}%</td><td>${ar.hConstrained}</td></tr>`;
+  }
+  body += `<tr class="total"><td>Floor total</td><td>${f0(floorSpaces())}</td><td>${f1(st.attend)}</td>` +
+    `<td>${f1(st.peak)}</td><td>${f0(st.spaceUtil * 100)}%</td><td>${f0(st.nurUtil * 100)}%</td>` +
+    `<td>${f0(st.medUtil * 100)}%</td><td>${st.hConstrained}</td></tr>`;
+  return `<div class="table-wrap"><table><tr><th>Area</th><th>Spaces</th><th>Attendances/day</th><th>Peak present</th><th>Peak space use</th><th>Peak nursing use</th><th>Medical capacity used</th><th>Hours constrained</th></tr>${body}</table></div>`;
+}
+
 function renderPanels(prefix, st, view, cmp) {
   const container = document.getElementById("panels-" + prefix);
 
   if (view === "overall") {
     const id = prefix + "-overall";
     container.innerHTML = `<div class="chart-panel">
-      <div class="panel-title">Overall Service — Hourly Status</div>
-      <div class="panel-sub">Medical capacity (patients assessed per hour) and nursing capacity (patients safely managed at once) are never added together. Each hour below is classified by whichever, if either, is under pressure.</div>
+      <div class="panel-title">Whole Floor — Hourly Status</div>
+      <div class="panel-sub">Medical capacity (patients assessed per hour), nursing capacity (patients held at once) and physical spaces are never added together. Each hour below is classified by whichever of them, if any, is exceeded — for the floor as a whole. Switch to <strong>By area</strong> to see which area it is.</div>
       <div class="chart-wrap" id="strip-${id}"></div>
-      <div class="legend">
-        <span class="key"><span class="swatch box" style="background:var(--good)"></span>Green — within capacity</span>
-        <span class="key"><span class="swatch box" style="background:var(--accent)"></span>Blue — medical constraint</span>
-        <span class="key"><span class="swatch box" style="background:var(--bad-2)"></span>Amber — nursing constraint</span>
-        <span class="key"><span class="swatch box" style="background:var(--bad)"></span>Red — both constrained</span>
-        <span class="key"><span class="swatch box" style="background:var(--chip-bg)"></span>Grey — closed</span>
-      </div>
+      ${STRIP_LEGEND}
     </div>`;
     renderStatusStrip(document.getElementById("strip-" + id), st);
+    return;
+  }
+
+  if (view === "areas") {
+    const id = prefix + "-areas";
+    container.innerHTML = `<div class="chart-panel">
+      <div class="panel-title">By Area — Hourly Status</div>
+      <div class="panel-sub">The same classification applied to each area against its own demand, its own roster and its own spaces. An area with no demand entered is scored against nothing — that is a gap in the data, not a quiet area.</div>
+      <div class="chart-wrap" id="matrix-${id}"></div>
+      <div class="panel-title" style="margin-top:18px">By Area — Headline Numbers</div>
+      <div id="areatable-${id}"></div>
+    </div>`;
+    renderAreaMatrix(document.getElementById("matrix-" + id), st);
+    document.getElementById("areatable-" + id).innerHTML = areaTableHtml(st);
     return;
   }
 
   const showMed = view === "med";
   const showNur = view === "nur";
   let html = "";
-  if (showMed) html += `<div class="chart-panel"><div class="panel-title">Medical — Arrivals vs Seeing Capacity</div><div class="panel-sub">Can the clinicians on shift keep pace with arrivals, or does a queue build?</div>${panelHtml(prefix + "-med")}</div>`;
-  if (showNur) html += `<div class="chart-panel"><div class="panel-title">Nursing — Patients Present vs Nursing Capacity</div><div class="panel-sub">Are there enough bay nurses for the patients present?</div>${panelHtml(prefix + "-nur")}</div>`;
+  if (showMed) html += `<div class="chart-panel"><div class="panel-title">Medical — Arrivals vs Seeing Capacity</div><div class="panel-sub">Can the clinicians on shift keep pace with arrivals, or does a queue build? Floor-wide, including the floating pool.</div>${panelHtml(prefix + "-med")}</div>`;
+  if (showNur) html += `<div class="chart-panel"><div class="panel-title">Holding — Patients Present vs Nursing and Physical Capacity</div><div class="panel-sub">Are there enough nurses for the patients present, and enough trolleys, chairs and rooms to put them in? The balance bar below is against whichever of the two is tighter.</div>${panelHtml(prefix + "-nur")}</div>`;
   container.innerHTML = html;
 
   if (showMed) {
@@ -1316,13 +1855,13 @@ function renderPanels(prefix, st, view, cmp) {
   if (showNur) {
     const id = prefix + "-nur";
     const series = nurSeries(st, cmp);
-    lineChart(document.getElementById("line-" + id), series, {aria: "Patients present versus nursing capacity by hour"});
+    lineChart(document.getElementById("line-" + id), series, {aria: "Patients present versus nursing and physical capacity by hour"});
     renderLegend("legend-" + id, series);
-    gapBars(document.getElementById("gap-" + id), st.nurCap.map((v, h) => inWindow(h) ? v - st.occ[h] : 0),
-      {aria: "Nursing capacity minus patients present by hour", spareLabel: "Spare nursing capacity", shortLabel: "Patients over nursing capacity"});
+    gapBars(document.getElementById("gap-" + id), st.nurCap.map((v, h) => inWindow(h) ? Math.min(v, st.spaceCap[h]) - st.occ[h] : 0),
+      {aria: "Holding capacity minus patients present by hour", spareLabel: "Spare holding capacity", shortLabel: "Patients over holding capacity"});
   }
 }
-// shared by click handling, keyboard nav, and rebuildAllUI() after a reset
+
 function setSegActive(segId, view) {
   const seg = document.getElementById(segId);
   if (!seg) return;
@@ -1365,31 +1904,83 @@ function initSegs() {
   });
 }
 
-// ---------- demand profile editor ----------
-function renderDemandGrid() {
+// ---------- demand editor: one row per area, one column per hour ----------
+// The editable primitive is area x hour. The floor profile is the column total,
+// shown read-only underneath so it is obvious it is derived, not entered.
+function renderDemandMatrix() {
   const key = state.weekendView ? "we" : "wd";
-  const arr = state.demand[key];
-  const el = document.getElementById("demand-grid");
-  let html = "";
-  for (let h = state.openHour; h < state.closeHour && h < 24; h++) {
-    const id = "dem-" + key + "-" + h;
-    html += `<div class="field"><label for="${id}">${String(h).padStart(2, "0")}:00</label><input id="${id}" type="number" min="0" step="0.5" value="${arr[h]}" data-dem="${h}"><span class="unit">present</span></div>`;
-  }
-  el.innerHTML = html;
+  const el = document.getElementById("demand-matrix");
+  if (!el) return;
+  const open = Math.max(0, Math.min(23, Math.round(state.openHour) || 0));
+  const close = Math.max(open + 1, Math.min(24, Math.round(state.closeHour) || 24));
+  let head = "";
+  for (let h = open; h < close; h++) head += `<th scope="col">${String(h).padStart(2, "0")}:00</th>`;
+  let body = "";
+  state.areas.forEach((ar, ai) => {
+    let cells = "";
+    for (let h = open; h < close; h++) {
+      cells += `<td><input type="number" min="0" step="0.5" value="${ar.demand[key][h]}" data-dem="${ai}.${h}" aria-label="${esc(ar.name)} at ${String(h).padStart(2, "0")}:00, patients present"></td>`;
+    }
+    body += `<tr><th scope="row">${esc(ar.name)}</th>${cells}</tr>`;
+  });
+  let totals = "";
+  for (let h = open; h < close; h++) totals += `<td data-dem-total="${h}">—</td>`;
+  body += `<tr class="total"><th scope="row">Floor total</th>${totals}</tr>`;
+  el.innerHTML = `<tr><th scope="col">Area</th>${head}</tr>` + body;
   el.querySelectorAll("[data-dem]").forEach(inp => inp.addEventListener("input", () => {
-    const h = Number(inp.dataset.dem), v = Number(inp.value);
-    if (Number.isFinite(v)) { state.demand[key][h] = v; renderAll(); }
+    const [ai, h] = inp.dataset.dem.split(".").map(Number);
+    const v = Number(inp.value);
+    if (!Number.isFinite(v)) return;
+    state.areas[ai].demand[key][h] = v;
+    renderAll();
   }));
-  document.getElementById("dem-grid-note").textContent =
-    "Editing the " + (state.weekendView ? "weekend" : "weekday") + " profile. Flip the weekend toggle to edit the other profile.";
+  const note = document.getElementById("dem-grid-note");
+  if (note) note.textContent =
+    "Editing the " + (state.weekendView ? "weekend" : "weekday") + " profiles. Flip the weekend toggle to edit the other set.";
+  refreshDemandTotals();
+}
+// updated in place on every render so the matrix inputs never lose focus
+function refreshDemandTotals() {
+  const key = state.weekendView ? "we" : "wd";
+  document.querySelectorAll("[data-dem-total]").forEach(td => {
+    const h = Number(td.dataset.demTotal);
+    td.textContent = f1(state.areas.reduce((a, ar) => a + (Number(ar.demand[key][h]) || 0), 0));
+  });
+}
+
+// ---------- referral sources per area (secondary lens) ----------
+function renderAreaSources() {
+  const el = document.getElementById("area-sources");
+  if (!el) return;
+  let head = SOURCES.map(([, name]) => `<th scope="col">${name}</th>`).join("");
+  let body = "";
+  state.areas.forEach((ar, ai) => {
+    const cells = SOURCES.map(([k]) =>
+      `<td><input type="number" min="0" step="0.5" value="${Number(ar.sources[k]) || 0}" data-asrc="${ai}.${k}" aria-label="${esc(ar.name)} ${k} attendances per day"></td>`).join("");
+    body += `<tr><th scope="row">${esc(ar.name)}</th>${cells}</tr>`;
+  });
+  const totals = SOURCES.map(([k]) => `<td data-asrc-total="${k}">—</td>`).join("");
+  body += `<tr class="total"><th scope="row">Floor total</th>${totals}</tr>`;
+  el.innerHTML = `<tr><th scope="col">Area</th>${head}</tr>` + body;
+  el.querySelectorAll("[data-asrc]").forEach(inp => inp.addEventListener("input", () => {
+    const [ai, k] = inp.dataset.asrc.split(".");
+    const v = Number(inp.value);
+    if (Number.isFinite(v)) { state.areas[Number(ai)].sources[k] = v; renderAll(); }
+  }));
+  refreshAreaSourceTotals();
+}
+function refreshAreaSourceTotals() {
+  const tot = floorSources();
+  document.querySelectorAll("[data-asrc-total]").forEach(td => { td.textContent = f1(tot[td.dataset.asrcTotal]); });
 }
 
 // ---------- future levers ----------
 function renderDemandLevers() {
   const wrap = document.getElementById("demand-levers");
+  const src = floorSources();
   wrap.innerHTML = SOURCES.map(([k, name]) => {
     const m = state.future.srcMult[k];
-    const val = state.sources[k] * m;
+    const val = src[k] * m;
     return `<div class="iv-vol">
       <div style="min-width:96px;font-weight:600;font-size:13px">${name}</div>
       <input type="range" min="0" max="3" step="0.05" value="${m}" data-src="${k}" aria-label="${name} multiplier">
@@ -1403,24 +1994,52 @@ function renderDemandLevers() {
     renderAll();
   }));
   wrap.querySelectorAll("[data-src-abs]").forEach(inp => inp.addEventListener("input", () => {
-    const k = inp.dataset.srcAbs, v = Number(inp.value), base = state.sources[k];
+    const k = inp.dataset.srcAbs, v = Number(inp.value), base = floorSources()[k];
     if (!Number.isFinite(v) || v < 0 || base <= 0) return;
     state.future.srcMult[k] = v / base;
     renderAll();
   }));
 }
+// Every lever targets an area (or the floating pool) — that is the whole point of
+// the rearchitecture: you add a nurse *to Bay 2*, not "to SDEC".
 function renderCapacityLevers() {
   const wrap = document.getElementById("capacity-levers");
+  const famLabel = lv => lv.kind === "space" ? "physical space" : (lv.fam === "med" ? "medical" : "nursing");
   wrap.innerHTML = state.future.levers.map(lv => `
     <div class="card iv-card">
       <div class="iv-head">
-        <div><div class="iv-name">${lv.name}</div><div class="iv-note">${lv.note} &middot; ${lv.fam === "med" ? "medical" : "nursing"}</div></div>
-        <label class="switch"><input type="checkbox" data-lever="${lv.id}" ${lv.on ? "checked" : ""} aria-label="Toggle ${lv.name}"><span class="track"></span></label>
+        <div><div class="iv-name">${esc(lv.name)}</div><div class="iv-note">${esc(lv.note)} &middot; ${famLabel(lv)}</div></div>
+        <label class="switch"><input type="checkbox" data-lever="${esc(lv.id)}" ${lv.on ? "checked" : ""} aria-label="Toggle ${esc(lv.name)}"><span class="track"></span></label>
+      </div>
+      <div class="iv-vol">
+        <label for="lever-area-${esc(lv.id)}" style="font-size:12.5px;color:var(--ink-2)">Target area</label>
+        <select id="lever-area-${esc(lv.id)}" data-lever-area="${esc(lv.id)}"${lv.kind === "space" ? "" : ""}>${areaOptionsHtml(lv.area, lv.kind === "space" ? "— pick an area —" : "Floating / unassigned")}</select>
       </div>
     </div>`).join("");
   wrap.querySelectorAll("[data-lever]").forEach(cb => cb.addEventListener("change", () => {
     state.future.levers.find(l => l.id === cb.dataset.lever).on = cb.checked;
     renderAll();
+  }));
+  wrap.querySelectorAll("[data-lever-area]").forEach(sel => sel.addEventListener("change", () => {
+    state.future.levers.find(l => l.id === sel.dataset.leverArea).area = sel.value;
+    renderAll();
+  }));
+}
+
+// ad-hoc physical space changes, per area, for the future state
+function renderAreaSpaceLevers() {
+  const wrap = document.getElementById("area-space-levers");
+  if (!wrap) return;
+  const deltas = state.future.areaSpaceDeltas || (state.future.areaSpaceDeltas = {});
+  wrap.innerHTML = state.areas.map(ar => {
+    const d = Number(deltas[ar.id]) || 0;
+    return `<div class="field"><label for="sp-delta-${esc(ar.id)}">${esc(ar.name)}</label>
+      <input id="sp-delta-${esc(ar.id)}" type="number" step="1" value="${d}" data-space-delta="${esc(ar.id)}">
+      <span class="unit">spaces (now ${f0(areaSpaces(ar))})</span></div>`;
+  }).join("");
+  wrap.querySelectorAll("[data-space-delta]").forEach(inp => inp.addEventListener("input", () => {
+    const v = Number(inp.value);
+    if (Number.isFinite(v)) { state.future.areaSpaceDeltas[inp.dataset.spaceDelta] = v; renderAll(); }
   }));
 }
 
@@ -1445,6 +2064,7 @@ function futureCapRowHtml(fam, i, r) {
       <option value="wd"${r.days === "wd" ? " selected" : ""}>Weekday</option>
       <option value="we"${r.days === "we" ? " selected" : ""}>Weekend</option>
     </select></td>
+    <td><select data-fcap="${fam}.${i}.area" aria-label="Area for ${label}">${areaOptionsHtml(r.area)}</select></td>
     <td class="${addedCls}">${added >= 0 ? "+" : "\u2212"}${f1(Math.abs(added))}</td>
     <td><button class="btn-x" data-fcap-del="${fam}.${i}" type="button" aria-label="Remove ${label} line"><span class="x-icon" aria-hidden="true">&#10005;</span><span>Remove</span></button></td>
   </tr>`;
@@ -1453,8 +2073,8 @@ function renderFutureCapEditor(fam, elId) {
   const el = document.getElementById(elId);
   const cols = fam === "med"
     ? `<th scope="col">Patients assessed per clinician per hour</th>`
-    : `<th scope="col">Bay?</th><th scope="col">Patients safely managed per nurse</th>`;
-  const colspan = fam === "med" ? 9 : 10;
+    : `<th scope="col">Holds patients?</th><th scope="col">Patients safely held per nurse</th>`;
+  const colspan = fam === "med" ? 10 : 11;
   const rows = state.future.customCapacity[fam];
   if (!rows.length) {
     el.innerHTML = `<tr><td style="color:var(--muted);text-align:left">No ${fam === "med" ? "medical" : "nursing"} lines yet — pull in current-state capacity or add a new line.</td></tr>`;
@@ -1466,7 +2086,7 @@ function renderFutureCapEditor(fam, elId) {
       body += `<tr class="group-row"><td colspan="${colspan}">${groupLabel}</td></tr>` +
         idxs.map(i => futureCapRowHtml(fam, i, rows[i])).join("");
     }
-    el.innerHTML = `<tr><th scope="col">Staff</th><th scope="col">WTE</th>${cols}<th scope="col">Cost/WTE (£/yr)</th><th scope="col">Start</th><th scope="col">End</th><th scope="col">Days</th><th scope="col">Added WTE</th><th scope="col"><span class="sr-only">Actions</span></th></tr>` + body;
+    el.innerHTML = `<tr><th scope="col">Staff</th><th scope="col">WTE</th>${cols}<th scope="col">Cost/WTE (£/yr)</th><th scope="col">Start</th><th scope="col">End</th><th scope="col">Days</th><th scope="col">Area</th><th scope="col">Added WTE</th><th scope="col"><span class="sr-only">Actions</span></th></tr>` + body;
   }
   el.querySelectorAll("[data-fcap]").forEach(inp => {
     const ev = inp.type === "checkbox" ? "change" : "input";
@@ -1474,7 +2094,7 @@ function renderFutureCapEditor(fam, elId) {
       const [f, i, k] = inp.dataset.fcap.split(".");
       const row = state.future.customCapacity[f][Number(i)];
       if (k === "bay") row[k] = inp.checked;
-      else if (k === "label" || k === "s" || k === "e" || k === "days") row[k] = inp.value;
+      else if (k === "label" || k === "s" || k === "e" || k === "days" || k === "area") row[k] = inp.value;
       else { const v = Number(inp.value); if (Number.isFinite(v)) row[k] = v; }
       renderFutureCapEditor(f, elId); renderAll();
     });
@@ -1495,11 +2115,11 @@ function initFutureCapEditors() {
     renderAll();
   });
   document.getElementById("add-future-med").addEventListener("click", () => {
-    state.future.customCapacity.med.push({label: "New medical line", n: 1, baseN: 0, rate: 0.6, cost: state.costMedWTE, s: "09:00", e: "17:00", days: "all"});
+    state.future.customCapacity.med.push({label: "New medical line", n: 1, baseN: 0, rate: 0.6, cost: state.costMedWTE, s: "09:00", e: "17:00", days: "all", area: ""});
     renderFutureCapEditor("med", "future-cap-med"); renderAll();
   });
   document.getElementById("add-future-nur").addEventListener("click", () => {
-    state.future.customCapacity.nur.push({label: "New nursing line", n: 1, baseN: 0, rate: 4, cost: state.costNurWTE, s: "08:00", e: "20:30", days: "all", bay: true});
+    state.future.customCapacity.nur.push({label: "New nursing line", n: 1, baseN: 0, rate: 4, cost: state.costNurWTE, s: "08:00", e: "20:30", days: "all", bay: true, area: ""});
     renderFutureCapEditor("nur", "future-cap-nur"); renderAll();
   });
 }
@@ -1514,30 +2134,53 @@ function deltaStr(v, unit, goodDown) {
 
 function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
+// one colour per area, in layout order, shared by the per-area demand chart
+const AREA_COLORS = ["var(--a1)", "var(--a2)", "var(--a3)", "var(--a4)", "var(--a5)", "var(--a6)"];
+
+// the physical footprint read-out in the Assumptions section
+function renderFootprintSummary() {
+  const el = document.getElementById("footprint-summary");
+  if (!el) return;
+  el.innerHTML = state.areas.map(ar => {
+    const bits = [];
+    if (ar.trolleys) bits.push(`${f0(ar.trolleys)} trolleys`);
+    if (ar.chairs) bits.push(`${f0(ar.chairs)} chairs`);
+    if (ar.rooms) bits.push(`${f0(ar.rooms)} rooms`);
+    return `<div><strong>${esc(ar.name)}</strong> — ${bits.join(" + ") || "no spaces set"} = ${f0(areaSpaces(ar))} spaces</div>`;
+  }).join("") + `<div><strong>Floor total</strong> — ${f0(floorSpaces())} spaces</div>`;
+}
+
 // Deterministic plain-English read-out of the hourly classification: the main
-// constraint, when it happens, and whether the other staffing group is also
-// constrained at the same time. Never more than three statements.
+// constraint, when it happens, and whether anything else is short too.
+const DIMENSION_NOUN = {medical: "medical capacity", nursing: "nursing capacity", space: "physical space"};
+function dimensionHours(st, dim) {
+  return st.hourClass.reduce((a, cls) => a + (cls.split("+").indexOf(dim) >= 0 ? 1 : 0), 0);
+}
 function interpretationStatements(st) {
   const c = st.hourCounts;
   if (st.hConstrained === 0) {
-    return ["No hours are constrained — medical and nursing capacity both keep pace with demand all day."];
+    return ["No hours are constrained — medical capacity, nursing capacity and physical space all keep pace with demand all day."];
   }
-  const operatingHours = c.within + c.medical + c.nursing + c.both;
-  const medHrs = c.medical + c.both, nurHrs = c.nursing + c.both;
-  let main = null, other = null, mainHrs = medHrs;
-  if (medHrs > nurHrs) { main = "medical"; other = "nursing"; mainHrs = medHrs; }
-  else if (nurHrs > medHrs) { main = "nursing"; other = "medical"; mainHrs = nurHrs; }
+  const operatingHours = HOUR_CLASSES.reduce((a, k) => a + (k === "closed" ? 0 : c[k]), 0);
+  const byDim = {};
+  DIMENSIONS.forEach(d => { byDim[d] = dimensionHours(st, d); });
+  const top = Math.max(...DIMENSIONS.map(d => byDim[d]));
+  const leaders = DIMENSIONS.filter(d => byDim[d] === top);
+  const plural = operatingHours === 1 ? "" : "s";
 
-  const out = [main
-    ? `The main constraint is ${main} capacity, constrained for ${mainHrs} of ${operatingHours} operating hour${operatingHours === 1 ? "" : "s"}.`
-    : `Medical and nursing capacity are equally constrained, each for ${mainHrs} of ${operatingHours} operating hour${operatingHours === 1 ? "" : "s"}.`];
+  let main = null;
+  const out = [];
+  if (leaders.length === 1) {
+    main = leaders[0];
+    out.push(`The main constraint is ${DIMENSION_NOUN[main]}, constrained for ${top} of ${operatingHours} operating hour${plural}.`);
+  } else {
+    out.push(capitalize(leaders.map(d => DIMENSION_NOUN[d]).join(" and ")) + ` are equally constrained, each for ${top} of ${operatingHours} operating hour${plural}.`);
+  }
 
   const matchHours = [];
-  for (let h = 0; h < 24; h++) {
+  for (let h = 0; h < HOURS; h++) {
     const cls = st.hourClass[h];
-    const matches = main === "medical" ? (cls === "medical" || cls === "both")
-      : main === "nursing" ? (cls === "nursing" || cls === "both")
-      : (cls === "medical" || cls === "nursing" || cls === "both");
+    const matches = main ? cls.split("+").indexOf(main) >= 0 : (cls !== "within" && cls !== "closed");
     if (matches) matchHours.push(h);
   }
   if (matchHours.length) {
@@ -1545,27 +2188,59 @@ function interpretationStatements(st) {
     out.push(`It occurs mainly between ${String(minH).padStart(2, "0")}:00 and ${String((maxH + 1) % 24).padStart(2, "0")}:00.`);
   }
 
-  if (other) {
-    if (c.both > 0) out.push(`${capitalize(other)} is also constrained at the same time, for ${c.both} of those hours.`);
-    else if ((other === "medical" ? c.medical : c.nursing) > 0) out.push(`${capitalize(other)} is constrained separately, at a different time.`);
-    else out.push(`${capitalize(other)} capacity is not constrained at any point.`);
-  } else if (c.both > 0) {
-    out.push(`Medical and nursing constraints overlap for ${c.both} of those hours.`);
+  const others = DIMENSIONS.filter(d => d !== main && byDim[d] > 0);
+  if (others.length) {
+    out.push(capitalize(others.map(d => DIMENSION_NOUN[d]).join(" and ")) + " also runs short at points in the day — the by-area view shows where.");
+  } else if (main) {
+    out.push("Neither " + DIMENSIONS.filter(d => d !== main).map(d => DIMENSION_NOUN[d]).join(" nor ") + " is constrained at any point.");
   }
   return out.slice(0, 3);
 }
 
-// headline "Hours constrained" metric (with medical/nursing/both breakdown) and
+// Names the areas actually in trouble — the detail a floor-wide total hides.
+function areaStatements(st) {
+  const out = [];
+  const constrained = st.areas.filter(a => a.hConstrained > 0).sort((a, b) => b.hConstrained - a.hConstrained);
+  if (!constrained.length) {
+    out.push("No individual area is constrained at any hour.");
+  } else {
+    const worst = constrained[0];
+    const drivers = DIMENSIONS.filter(d => dimensionHours(worst, d) > 0).map(d => DIMENSION_NOUN[d]);
+    out.push(`${worst.name} is the tightest area: ${worst.hConstrained} constrained hour${worst.hConstrained === 1 ? "" : "s"}, driven by ${drivers.join(" and ")}.`);
+    if (constrained.length > 1) {
+      out.push("Also constrained at some point in the day: " + constrained.slice(1).map(a => a.name).join(", ") + ".");
+    }
+    if (st.hConstrained === 0) {
+      out.push("The floor-wide view reads as within capacity while these areas are over — this is exactly what a floor total hides.");
+    }
+  }
+  const empty = st.areas.filter(a => !a.hasDemand).map(a => a.name);
+  if (empty.length) {
+    out.push(`No demand has been entered for ${empty.join(", ")}, so ${empty.length > 1 ? "they are" : "it is"} scored against nothing — placeholders awaiting real per-area attendance data.`);
+  }
+  return out;
+}
+
+// headline "Hours constrained" metric (with the per-dimension breakdown) and
 // the interpretation statements above it — shared by the current and future states
 function renderConstraintSummary(prefix, st) {
-  const c = st.hourCounts;
   document.getElementById(prefix + "-constrained").textContent = String(st.hConstrained);
   document.getElementById(prefix + "-constrained-sub").textContent =
-    st.hConstrained === 0 ? "none — within capacity all day" : `${c.medical} medical · ${c.nursing} nursing · ${c.both} both`;
+    st.hConstrained === 0 ? "none — within capacity all day"
+      : DIMENSIONS.filter(d => dimensionHours(st, d) > 0).map(d => `${dimensionHours(st, d)} ${d}`).join(" · ");
+  const bad = st.areas.filter(a => a.hConstrained > 0);
+  const areasEl = document.getElementById(prefix + "-areas");
+  if (areasEl) {
+    areasEl.textContent = `${bad.length} of ${st.areas.length}`;
+    areasEl.className = "stat-value " + (bad.length ? "neg" : "");
+    document.getElementById(prefix + "-areas-sub").textContent =
+      bad.length ? bad.map(a => a.name).join(", ") : "every area within capacity all day";
+  }
   const box = document.getElementById(prefix + "-interpretation");
   const list = box && box.querySelector("ul");
-  if (list) list.innerHTML = interpretationStatements(st).map(s => `<li>${s}</li>`).join("");
+  if (list) list.innerHTML = interpretationStatements(st).concat(areaStatements(st)).map(s => `<li>${s}</li>`).join("");
 }
+
 
 function renderAll() {
   const cur = computeState(false);
@@ -1573,14 +2248,18 @@ function renderAll() {
   const dayLabel = state.weekendView ? "weekend" : "weekday";
 
   // src reconciliation warning
-  const srcTot = state.sources.edPull + state.sources.gp + state.sources.followup + state.sources.oneoneone + state.sources.hotClinic;
+  const srcAll = floorSources();
+  const srcTot = SOURCES.reduce((a, [k]) => a + srcAll[k], 0);
   document.getElementById("warn-src").style.display = Math.abs(srcTot - cur.attend) > Math.max(8, cur.attend * 0.3) ? "block" : "none";
 
-  // capacity chart
+  // capacity chart (floor-wide roll-up)
   lineChart(document.getElementById("chart-cap"),
     [{name: "Medical seeing capacity", vals: cur.medCap, color: "var(--accent)"},
-     {name: "Nursing capacity", vals: cur.nurCap, color: "var(--aqua)"}],
-    {aria: "Medical and nursing capacity by hour"});
+     {name: "Nursing holding capacity", vals: cur.nurCap, color: "var(--aqua)"},
+     {name: "Physical spaces", vals: cur.spaceCap, color: "var(--violet)", dash: true}],
+    {aria: "Medical, nursing and physical capacity by hour"});
+  refreshAreaSummaries();
+  renderFootprintSummary();
 
   // demand section
   document.getElementById("dem-attend").textContent = f1(cur.attend);
@@ -1588,12 +2267,20 @@ function renderAll() {
   document.getElementById("dem-peak").textContent = f1(cur.peak);
   document.getElementById("dem-peak-sub").textContent = "at " + String(cur.peakH).padStart(2, "0") + ":00";
   document.getElementById("dem-los").textContent = f1(state.meanLos) + " h";
+  document.getElementById("dem-spaces").textContent = f0(floorSpaces());
+  document.getElementById("dem-spaces-sub").textContent =
+    state.areas.length + " areas · peak use " + f0(cur.spaceUtil * 100) + "%";
   document.getElementById("dem-chart-sub").textContent =
-    "Average " + dayLabel + ", from the activity export. Dashed line = arrivals per hour derived from patients present and a " + f1(state.meanLos) + "h stay.";
+    "Average " + dayLabel + ", summed across every area. Dashed line = arrivals per hour derived from patients present and a " + f1(state.meanLos) + "h stay.";
   lineChart(document.getElementById("chart-demand"),
     [{name: "Patients present", vals: cur.occ, color: "var(--aqua)"},
      {name: "Arrivals /hr", vals: cur.arr, color: "var(--muted)", dash: true}],
     {aria: "Patients present and arrivals by hour"});
+  const areaSeries = cur.areas.map((r, i) => ({name: r.name, vals: r.occ, color: AREA_COLORS[i % AREA_COLORS.length]}));
+  lineChart(document.getElementById("chart-demand-areas"), areaSeries, {aria: "Patients present by area and hour"});
+  renderLegend("legend-demand-areas", areaSeries);
+  refreshDemandTotals();
+  refreshAreaSourceTotals();
 
   // current state
   document.getElementById("cur-attend").textContent = f1(cur.attend);
@@ -1606,6 +2293,10 @@ function renderAll() {
   cnu.className = "stat-value " + (cur.nurUtil > 1.001 ? "neg" : "");
   document.getElementById("cur-med-util").textContent = f0(cur.medUtil * 100) + "%";
   document.getElementById("cur-med-util-sub").textContent = f1(cur.medCapDay) + " seen/day capacity vs " + f1(cur.attend) + " arrivals";
+  document.getElementById("cur-space-util").textContent = f0(cur.spaceUtil * 100) + "%";
+  document.getElementById("cur-space-util-sub").textContent =
+    f1(cur.peak) + " present at peak in " + f0(floorSpaces()) + " spaces";
+  document.getElementById("cur-space-util").className = "stat-value " + (cur.spaceUtil > 1.001 ? "neg" : "");
   document.getElementById("cur-queue").textContent = f1(cur.peakQueue);
   document.getElementById("cur-queue-sub").textContent = cur.peakQueue > 0.5 ? "peak at " + String(cur.queueH).padStart(2, "0") + ":00" : "capacity keeps pace";
   renderConstraintSummary("cur", cur);
@@ -1620,6 +2311,9 @@ function renderAll() {
   document.getElementById("fut-nur-util").className = "stat-value " + (fut.nurUtil > 1.001 ? "neg" : "");
   document.getElementById("fut-med-util").textContent = f0(fut.medUtil * 100) + "%";
   document.getElementById("fut-med-util-sub").innerHTML = deltaStr((fut.medUtil - cur.medUtil) * 100, "pp", true);
+  document.getElementById("fut-space-util").textContent = f0(fut.spaceUtil * 100) + "%";
+  document.getElementById("fut-space-util-sub").innerHTML = deltaStr((fut.spaceUtil - cur.spaceUtil) * 100, "pp", true);
+  document.getElementById("fut-space-util").className = "stat-value " + (fut.spaceUtil > 1.001 ? "neg" : "");
   document.getElementById("fut-queue").textContent = f1(fut.peakQueue);
   document.getElementById("fut-queue-sub").innerHTML = deltaStr(fut.peakQueue - cur.peakQueue, "", true);
   renderConstraintSummary("fut", fut);
@@ -1645,28 +2339,12 @@ function renderAll() {
 // on spare capacity that nobody has proposed adding or removing.
 const gbp = n => "£" + Math.round(n).toLocaleString("en-GB");
 
-// every active preset lever and custom capacity edit, each with its net WTE change
-// (+ addition / − removal) and, where set, its own cost per WTE
-function capacityAdditionRows() {
-  const rows = [];
-  for (const lv of state.future.levers) {
-    if (!lv.on) continue;
-    const wte = lv.add.reduce((a, l) => a + (l.n || 0), 0);
-    rows.push({label: lv.name + " (preset)", fam: lv.fam, wte});
-  }
-  for (const fam of ["med", "nur"]) {
-    for (const r of state.future.customCapacity[fam]) {
-      const added = (r.n || 0) - (r.baseN || 0);
-      if (Math.abs(added) > 1e-9) rows.push({label: r.label, fam, wte: added, cost: r.cost});
-    }
-  }
-  return rows;
-}
 function renderCostReadout() {
   const rows = capacityAdditionRows();
+  const spaceRows = spaceAdditionRows();
   const el = document.getElementById("cost-readout");
-  if (!rows.length) {
-    el.innerHTML = `<strong>Cost of Future-State Staffing Changes</strong> — no staffing additions or removals are set for the future state, so there is no cost or saving to report. Toggle a preset lever, or pull in and edit current-state capacity above, to model a change.`;
+  if (!rows.length && !spaceRows.length) {
+    el.innerHTML = `<strong>Cost of Future-State Staffing Changes</strong> — no staffing or space additions are set for the future state, so there is no cost or saving to report. Toggle a preset lever, add spaces to an area, or pull in and edit current-state capacity above, to model a change.`;
     return;
   }
   let medWte = 0, medCost = 0, nurWte = 0, nurCost = 0;
@@ -1681,6 +2359,9 @@ function renderCostReadout() {
     `Medical ${wteCellHtml(medWte)} → ${costCellHtml(medCost)}. ` +
     `Nursing ${wteCellHtml(nurWte)} → ${costCellHtml(nurCost)}. ` +
     `Net ${costCellHtml(total)}. ` +
+    (spaceRows.length
+      ? `Physical space ${spaceRows.reduce((a, r) => a + r.spaces, 0) >= 0 ? "+" : "\u2212"}${f1(Math.abs(spaceRows.reduce((a, r) => a + r.spaces, 0)))} spaces — not costed here (capital and estates are out of scope). `
+      : "") +
     `Indicative only — confirm costs and establishment with finance.`;
 }
 
@@ -1698,29 +2379,34 @@ function wteCellHtml(wte) {
 }
 function renderCapAdditionSummary() {
   const rows = capacityAdditionRows();
+  const spaceRows = spaceAdditionRows();
   const el = document.getElementById("cap-addition-summary");
   const note = document.getElementById("cap-addition-note");
-  if (!rows.length) {
-    el.innerHTML = `<tr><td style="text-align:left;color:var(--muted)">No capacity additions yet — toggle a preset lever, or pull in and edit current-state capacity above.</td></tr>`;
-    if (note) note.textContent = "Every active preset lever and custom addition above will appear here, with its net WTE change and indicative annual cost or saving.";
+  if (!rows.length && !spaceRows.length) {
+    el.innerHTML = `<tr><td style="text-align:left;color:var(--muted)">No capacity additions yet — toggle a preset lever, add spaces to an area, or pull in and edit current-state capacity above.</td></tr>`;
+    if (note) note.textContent = "Every active preset lever, custom addition and space change above will appear here, with the area it targets and its indicative annual cost or saving.";
     return;
   }
   let totalWte = 0, totalCost = 0;
-  const body = rows.map(r => {
+  let body = rows.map(r => {
     const costPerWte = Number.isFinite(r.cost) ? r.cost : (r.fam === "med" ? state.costMedWTE : state.costNurWTE);
     const cost = r.wte * costPerWte;
     totalWte += r.wte; totalCost += cost;
-    return `<tr><td>${r.label}</td><td>${r.fam === "med" ? "Medical" : "Nursing"}</td><td>${wteCellHtml(r.wte)}</td><td>${costCellHtml(cost)}</td></tr>`;
+    return `<tr><td>${esc(r.label)}</td><td>${r.fam === "med" ? "Medical" : "Nursing"}</td><td>${esc(areaNameOf(r.area))}</td><td>${wteCellHtml(r.wte)}</td><td>${costCellHtml(cost)}</td></tr>`;
   }).join("");
-  el.innerHTML = `<tr><th>Addition</th><th>Team</th><th>Net WTE</th><th>Annual Cost / Saving</th></tr>` + body +
-    `<tr class="total"><td>Total</td><td></td><td>${wteCellHtml(totalWte)}</td><td>${costCellHtml(totalCost)}</td></tr>`;
-  if (note) note.textContent = "Every active preset lever and custom addition above, with its net WTE change and indicative annual cost or saving.";
+  body += spaceRows.map(r =>
+    `<tr><td>${esc(r.label)}</td><td>Physical space</td><td>${esc(areaNameOf(r.area))}</td>` +
+    `<td class="${r.spaces > 0 ? "pos" : "neg"}">${r.spaces >= 0 ? "+" : "\u2212"}${f1(Math.abs(r.spaces))} spaces</td>` +
+    `<td style="color:var(--muted)">not costed</td></tr>`).join("");
+  el.innerHTML = `<tr><th>Addition</th><th>Team</th><th>Area</th><th>Net change</th><th>Annual Cost / Saving</th></tr>` + body +
+    `<tr class="total"><td>Total</td><td></td><td></td><td>${wteCellHtml(totalWte)}</td><td>${costCellHtml(totalCost)}</td></tr>`;
+  if (note) note.textContent = "Every active preset lever, custom addition and space change above, with the area it targets, its net change and indicative annual cost or saving. Physical space is reported but not priced.";
 }
 
 // keep the source lever outputs in step with edited source volumes
 function renderSourceInputs() {
   document.querySelectorAll("#demand-levers [data-src]").forEach(sl => {
-    const k = sl.dataset.src, m = state.future.srcMult[k], val = state.sources[k] * m;
+    const k = sl.dataset.src, m = state.future.srcMult[k], val = floorSources()[k] * m;
     if (document.activeElement !== sl) sl.value = clamp(m, Number(sl.min), Number(sl.max));
     const out = sl.parentElement.querySelector("output");
     if (out) out.innerHTML = `&times;${f1(m)}`;
@@ -1755,13 +2441,14 @@ function rebuildAllUI() {
   const wv = document.getElementById("weekend-view"), wv2 = document.getElementById("weekend-view-2");
   if (wv) wv.checked = state.weekendView;
   if (wv2) wv2.checked = state.weekendView;
-  renderCapEditor("med", "cap-med");
-  renderCapEditor("nur", "cap-nur");
+  renderAreaCards();
   renderFutureCapEditor("med", "future-cap-med");
   renderFutureCapEditor("nur", "future-cap-nur");
-  renderDemandGrid();
+  renderDemandMatrix();
+  renderAreaSources();
   renderDemandLevers();
   renderCapacityLevers();
+  renderAreaSpaceLevers();
   setSegActive("seg-cur", state.ui.curView);
   setSegActive("seg-fut", state.ui.futView);
   renderAll();
@@ -1780,13 +2467,17 @@ function buildSummaryText() {
     "Attendances/day: " + g("cur-attend") + " (" + g("cur-attend-sub") + ")",
     "Peak nursing use: " + g("cur-nur-util") + " — " + g("cur-nur-util-sub"),
     "Medical capacity used: " + g("cur-med-util") + " — " + g("cur-med-util-sub"),
+    "Peak space use: " + g("cur-space-util") + " — " + g("cur-space-util-sub"),
     "Peak queue to be seen: " + g("cur-queue") + " — " + g("cur-queue-sub"),
+    "Areas constrained: " + g("cur-areas") + " — " + g("cur-areas-sub"),
     "",
     "FUTURE STATE",
     "Attendances/day: " + g("fut-attend") + " (" + g("fut-attend-sub") + ")",
     "Peak nursing use: " + g("fut-nur-util") + " (" + g("fut-nur-util-sub") + ")",
     "Medical capacity used: " + g("fut-med-util") + " (" + g("fut-med-util-sub") + ")",
+    "Peak space use: " + g("fut-space-util") + " (" + g("fut-space-util-sub") + ")",
     "Peak queue to be seen: " + g("fut-queue") + " (" + g("fut-queue-sub") + ")",
+    "Areas constrained: " + g("fut-areas") + " — " + g("fut-areas-sub"),
     "",
     g("future-readout"),
     "",
@@ -1818,15 +2509,23 @@ async function copySummaryToClipboard() {
 }
 function buildHourlyCsv() {
   const cur = computeState(false), fut = computeState(true);
-  const rows = [["Hour", "Arrivals (current)", "Seeing capacity (current)", "Queue (current)", "Patients present (current)", "Nursing capacity (current)",
-    "Arrivals (future)", "Seeing capacity (future)", "Queue (future)", "Patients present (future)", "Nursing capacity (future)"].join(",")];
-  for (let h = 0; h < 24; h++) {
-    rows.push([
-      String(h).padStart(2, "0") + ":00",
-      cur.arr[h].toFixed(2), cur.medCap[h].toFixed(2), cur.queue[h].toFixed(2), cur.occ[h].toFixed(2), cur.nurCap[h].toFixed(2),
-      fut.arr[h].toFixed(2), fut.medCap[h].toFixed(2), fut.queue[h].toFixed(2), fut.occ[h].toFixed(2), fut.nurCap[h].toFixed(2),
-    ].join(","));
-  }
+  const csvCell = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
+  const header = ["Area", "Hour", "Arrivals (current)", "Seeing capacity (current)", "Queue (current)",
+    "Patients present (current)", "Nursing capacity (current)", "Physical spaces (current)", "Status (current)",
+    "Arrivals (future)", "Seeing capacity (future)", "Queue (future)", "Patients present (future)",
+    "Nursing capacity (future)", "Physical spaces (future)", "Status (future)"];
+  const rows = [header.join(",")];
+  const block = (label, c, f) => {
+    for (let h = 0; h < HOURS; h++) {
+      rows.push([label, String(h).padStart(2, "0") + ":00",
+        c.arr[h].toFixed(2), c.medCap[h].toFixed(2), c.queue[h].toFixed(2), c.occ[h].toFixed(2),
+        c.nurCap[h].toFixed(2), c.spaceCap[h].toFixed(2), c.hourClass[h],
+        f.arr[h].toFixed(2), f.medCap[h].toFixed(2), f.queue[h].toFixed(2), f.occ[h].toFixed(2),
+        f.nurCap[h].toFixed(2), f.spaceCap[h].toFixed(2), f.hourClass[h]].map(csvCell).join(","));
+    }
+  };
+  block("FLOOR TOTAL", cur, fut);
+  cur.areas.forEach((c, i) => block(c.name, c, fut.areas[i]));
   return rows.join("\r\n");
 }
 function downloadCsv() {

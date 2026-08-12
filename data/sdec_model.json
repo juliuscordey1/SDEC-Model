@@ -1,75 +1,190 @@
 {
   "meta": {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "name": "Medical SDEC demand and capacity model",
     "organisation": "East and North Hertfordshire NHS Trust",
     "savedAt": "2026-08-11T00:00:00.000Z",
     "isSyntheticDemoData": true,
     "disclosureMode": "standard",
-    "notes": "Seeded from the 'Medical SDEC Demand and Capacity Tool' demo data (SDEC activity export, Apr-Jul 2026, Lister). Values are illustrative placeholders, not confirmed local figures - see the Data to Confirm section in the README."
+    "notes": "Schema v2 rearchitects the model around PER-AREA demand and capacity. SDEC is no longer one floor-wide pool: each physical area carries its own spaces, its own staff roster and its own hourly attendance curve, and the floor-wide figures are the roll-up of those areas. The physical layout is confirmed by the SDEC Service Coordinator; the per-area SPLIT of staffing and demand is a placeholder derived mechanically from the v1 floor-wide seed (SDEC activity export, Apr-Jul 2026, Lister) - see meta.placeholderSplit and the Data to Confirm section in the README."
+  },
+  "placeholderSplit": {
+    "isPlaceholder": true,
+    "notes": "How the v1 floor-wide seed was split across areas, pending real per-area data. STAFFING: the two v1 bay nursing lines (1 WTE B6 NIC + 3 WTE B5, weekday; 2 WTE weekend) were split evenly by whole person across Bay 1 and Bay 2 (2 WTE each weekday, 1 WTE each weekend), preserving the v1 floor total; the EMT (darting/float) lines went to the Darting Rooms; NIC co-ordinator, hello, in-reach and triage nursing roles stayed FLOATING (areaId null) because they work across the whole floor rather than holding patients in one area; every medical line stayed FLOATING on the working assumption that clinicians circulate. DEMAND: the v1 floor-wide patients-present profile was split by referral-source share - hot clinics (5.0/37.2 = 13.4% of attendances) to the Hot Clinic Rooms and the remaining sources (ED pull, GP, follow-up, 111 = 86.6%) to the ambulatory chairs - applying the same hourly shape to both, because no per-area shape exists yet. Bay 1, Bay 2, Darting and Triage therefore carry NO placeholder demand: the referral-source split gives no basis for allocating any to them. Every one of these numbers is editable and none should be treated as observed."
   },
   "areas": [
     {
-      "id": "sdec",
-      "name": "Medical SDEC",
+      "id": "bay-1",
+      "name": "Bay 1",
       "order": 0,
       "active": true,
-      "physicalSpaces": 21,
+      "spaces": { "trolleys": 3, "chairs": 3, "rooms": 0 },
+      "physicalSpaces": 6,
+      "nursingConcurrency": true,
       "acuityWeight": 1,
-      "notes": "Single SDEC unit (not multiple physical zones). physicalSpaces = the funded 'chairs' ceiling (21 in the seed). This footprint is documented but not currently wired into the pressure calculations, mirroring the source tool; confirm the physical footprint locally."
+      "demandIsPlaceholder": true,
+      "notes": "3 trolleys + 3 chairs (confirmed layout). A nursing/concurrency area: patients here are held by bay nurses, so the patients-per-nurse holding capacity applies and is then capped at the 6 physical spaces."
+    },
+    {
+      "id": "bay-2",
+      "name": "Bay 2",
+      "order": 1,
+      "active": true,
+      "spaces": { "trolleys": 3, "chairs": 3, "rooms": 0 },
+      "physicalSpaces": 6,
+      "nursingConcurrency": true,
+      "acuityWeight": 1,
+      "demandIsPlaceholder": true,
+      "notes": "3 trolleys + 3 chairs (confirmed layout). Nursing/concurrency area, same as Bay 1."
+    },
+    {
+      "id": "ambulatory-chairs",
+      "name": "Ambulatory Chairs",
+      "order": 2,
+      "active": true,
+      "spaces": { "trolleys": 0, "chairs": 40, "rooms": 0 },
+      "physicalSpaces": 40,
+      "nursingConcurrency": false,
+      "acuityWeight": 1,
+      "demandIsPlaceholder": true,
+      "notes": "40 general chairs - the ambulatory zone outside Bay 1/2 (confirmed layout). Not modelled as a nursing/concurrency area because it has no dedicated nursing establishment in the v1 roster; whether these chairs have dedicated staff or float coverage is an open question for the SDEC team. Until then only the 40-space physical ceiling constrains it."
+    },
+    {
+      "id": "hot-clinic",
+      "name": "Hot Clinic Rooms",
+      "order": 3,
+      "active": true,
+      "spaces": { "trolleys": 0, "chairs": 0, "rooms": 2 },
+      "physicalSpaces": 2,
+      "nursingConcurrency": false,
+      "acuityWeight": 1,
+      "demandIsPlaceholder": true,
+      "notes": "2 hot clinic rooms (confirmed layout). Seeded with the hot-clinic referral-source volume against the floor-wide hourly shape - almost certainly wrong in shape, since hot clinics run to a booked template by day of week and each attendance is a shorter, separate throughput event rather than a bay-length stay."
+    },
+    {
+      "id": "darting",
+      "name": "Darting Rooms",
+      "order": 4,
+      "active": true,
+      "spaces": { "trolleys": 0, "chairs": 0, "rooms": 2 },
+      "physicalSpaces": 2,
+      "nursingConcurrency": false,
+      "acuityWeight": 1,
+      "demandIsPlaceholder": true,
+      "notes": "2 darting rooms (confirmed layout), staffed by the EMT lines. Not modelled as a nursing/concurrency area: the v1 EMT lines carried no nursing concurrency capacity (bay = false) and that treatment is preserved. Carries no placeholder demand - darting activity is not separable from the v1 floor-wide profile."
+    },
+    {
+      "id": "triage",
+      "name": "Triage Room",
+      "order": 5,
+      "active": true,
+      "spaces": { "trolleys": 0, "chairs": 0, "rooms": 1 },
+      "physicalSpaces": 1,
+      "nursingConcurrency": false,
+      "acuityWeight": 1,
+      "demandIsPlaceholder": true,
+      "notes": "There are 2 triage rooms but only 1 is usable for SDEC (the other belongs to AMU), so physicalSpaces = 1. Carries no placeholder demand, and it is an open question whether triage holds patients at all (an occupancy) or is a pure process step with no 'present' time to model."
     }
   ],
   "assumptions": {
     "operatingWindow": {
       "openHour": 7,
       "closeHour": 24,
-      "notes": "SDEC operating window (07:00-24:00 in the seed). Demand and capacity are zeroed outside this window."
+      "notes": "SDEC operating window (07:00-24:00 in the seed), applied to every area. Demand and capacity are zeroed outside this window."
     },
     "defaultNurseRatio": 4,
     "defaultCostMedWtePerYear": 110000,
     "defaultCostNurWtePerYear": 42000,
-    "notes": "SDEC-specific planning scalars kept out of standards.staffingRules (which is a different, rule-type concept). defaultNurseRatio is the fallback patients-per-nurse used for a nursing bay line that has no explicit patientsPerHour. The two default cost-per-WTE values are fallbacks used only when a capacity line has no explicit costPerWtePerYear. Patients-per-nurse ~1:4 is a common SDEC/AMU planning value - confirm with the nursing lead."
+    "floatingAllocation": "demandProportional",
+    "notes": "SDEC-specific planning scalars. defaultNurseRatio is the fallback patients-per-nurse used for a nursing line that holds patients but has no explicit patientsPerHour. floatingAllocation describes how staff with no areaId (the floating pool) are attributed to areas for the per-area view: each hour, the floating pool is shared out in proportion to that area's demand in that hour (medical seeing capacity by medical demand, nursing holding capacity by patients present). This is a display/attribution convention for circulating staff, not a model of which patient goes where; the floor-wide totals are unaffected by it."
   },
   "demand": {
     "method": "occupancyDeconvolution",
     "meanLosSource": "losProfiles",
     "areas": [
       {
-        "areaId": "sdec",
+        "areaId": "bay-1",
         "patientsPresentOverride": {
-          "weekday": [0, 0, 0, 0, 0, 0, 0, 0.69, 0.69, 5.73, 12.05, 16.09, 18.16, 20.03, 20.95, 21.26, 20.83, 18.99, 16.98, 14.52, 10.95, 7.57, 4.91, 3.09],
-          "weekend": [0, 0, 0, 0, 0, 0, 0, 0.65, 0.65, 3.32, 6.68, 8.85, 10.15, 11.12, 11.29, 10.71, 10.76, 9.24, 7.74, 6.24, 4.21, 2.29, 1.35, 0.91]
+          "weekday": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          "weekend": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         },
-        "arrivals": {
-          "weekday": [],
-          "weekend": []
+        "arrivals": { "weekday": [], "weekend": [] },
+        "sources": { "edPull": 0, "gp": 0, "followup": 0, "oneoneone": 0, "hotClinic": 0 },
+        "isPlaceholder": true,
+        "notes": "NO placeholder demand. The v1 floor-wide profile can only be split by referral source, and no source maps to a bay, so nothing was invented here. Bay 1 therefore shows staffed holding capacity against zero demand until the SDEC team supplies real per-area attendance."
+      },
+      {
+        "areaId": "bay-2",
+        "patientsPresentOverride": {
+          "weekday": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          "weekend": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         },
-        "notes": "Average patients PRESENT in SDEC by clock hour (index = hour of day), from the activity export. This is the primary raw input for SDEC (the reverse of the ED model's arrivals->occupancy direction): arrivals are derived at runtime by deconvolving occupancy against a box-car length of stay, so the arrivals arrays are intentionally left empty."
+        "arrivals": { "weekday": [], "weekend": [] },
+        "sources": { "edPull": 0, "gp": 0, "followup": 0, "oneoneone": 0, "hotClinic": 0 },
+        "isPlaceholder": true,
+        "notes": "NO placeholder demand - see the Bay 1 note."
+      },
+      {
+        "areaId": "ambulatory-chairs",
+        "patientsPresentOverride": {
+          "weekday": [0, 0, 0, 0, 0, 0, 0, 0.6, 0.6, 4.96, 10.43, 13.93, 15.72, 17.34, 18.13, 18.4, 18.03, 16.44, 14.7, 12.57, 9.48, 6.55, 4.25, 2.67],
+          "weekend": [0, 0, 0, 0, 0, 0, 0, 0.56, 0.56, 2.87, 5.78, 7.66, 8.79, 9.63, 9.77, 9.27, 9.31, 8.0, 6.7, 5.4, 3.64, 1.98, 1.17, 0.79]
+        },
+        "arrivals": { "weekday": [], "weekend": [] },
+        "sources": { "edPull": 14.2, "gp": 8.0, "followup": 9.9, "oneoneone": 0.1, "hotClinic": 0 },
+        "isPlaceholder": true,
+        "notes": "PLACEHOLDER: 86.6% of the v1 floor-wide patients-present profile (every referral source except hot clinics), hour by hour. This is where all non-hot-clinic demand sits by default until real per-area attendance data arrives; it is not an observation that these patients occupy a chair rather than a bay."
+      },
+      {
+        "areaId": "hot-clinic",
+        "patientsPresentOverride": {
+          "weekday": [0, 0, 0, 0, 0, 0, 0, 0.09, 0.09, 0.77, 1.62, 2.16, 2.44, 2.69, 2.82, 2.86, 2.8, 2.55, 2.28, 1.95, 1.47, 1.02, 0.66, 0.42],
+          "weekend": [0, 0, 0, 0, 0, 0, 0, 0.09, 0.09, 0.45, 0.9, 1.19, 1.36, 1.49, 1.52, 1.44, 1.45, 1.24, 1.04, 0.84, 0.57, 0.31, 0.18, 0.12]
+        },
+        "arrivals": { "weekday": [], "weekend": [] },
+        "sources": { "edPull": 0, "gp": 0, "followup": 0, "oneoneone": 0, "hotClinic": 5.0 },
+        "isPlaceholder": true,
+        "notes": "PLACEHOLDER: 13.4% of the v1 floor-wide patients-present profile - the hot-clinic referral-source share, spread on the floor-wide hourly shape. Real hot clinics run to a booked template (frailty, cardiology, rheumatology, ACT/respiratory) that varies by day of week, so both the shape and the implied length of stay need replacing."
+      },
+      {
+        "areaId": "darting",
+        "patientsPresentOverride": {
+          "weekday": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          "weekend": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        },
+        "arrivals": { "weekday": [], "weekend": [] },
+        "sources": { "edPull": 0, "gp": 0, "followup": 0, "oneoneone": 0, "hotClinic": 0 },
+        "isPlaceholder": true,
+        "notes": "NO placeholder demand. Darting is a short procedural event that the v1 floor-wide profile does not separate out; whether it should be modelled as occupancy at all is an open question."
+      },
+      {
+        "areaId": "triage",
+        "patientsPresentOverride": {
+          "weekday": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          "weekend": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        },
+        "arrivals": { "weekday": [], "weekend": [] },
+        "sources": { "edPull": 0, "gp": 0, "followup": 0, "oneoneone": 0, "hotClinic": 0 },
+        "isPlaceholder": true,
+        "notes": "NO placeholder demand - triage may be a pure process step with no modelled occupancy. Confirm with the SDEC team."
       }
     ],
-    "sources": {
-      "edPull": 14.2,
-      "gp": 8.0,
-      "followup": 9.9,
-      "oneoneone": 0.1,
-      "hotClinic": 5.0,
-      "notes": "Referral-source volumes in patients/day from the monthly audit: ED pull ~38%, follow-up ~27%, GP ~22%, hot clinics ~14%, 111 <1%. These are used only in the future state to rescale the day when future.sourceMultipliers change; the current state works off the patientsPresentOverride profile directly."
-    },
     "losProfiles": [
       {
-        "areaId": "sdec",
+        "areaId": null,
         "source": "averageLos",
         "averageLosHours": 5.0,
         "bands": [],
         "remainingCurve": [],
         "synthetic": true,
-        "notes": "SDEC uses one blended mean length of stay (box-car), not banded distributions. ~5.0h is data-implied (~213 patient-hours/day weekday / ~42.8 attendances). Confirm mean and distribution by referral source from SDEC actuals."
+        "notes": "One blended mean length of stay (box-car) applied to EVERY area - areaId null means floor-wide. ~5.0h is data-implied (~213 patient-hours/day weekday / ~42.8 attendances). Per-area length of stay is a known gap: a hot clinic or darting attendance is almost certainly far shorter than a bay stay."
       }
     ],
     "daysPerYear": {
       "weekday": 261,
       "weekend": 104
-    }
+    },
+    "notes": "The editable primitive is now area x hour patients-present. demand.areas[].sources keeps the referral-source volumes as a secondary lens per area; they carry no hourly shape of their own and are used to weight the future-state per-source multipliers for that area. Floor-wide demand and floor-wide referral-source volumes are the sum across areas."
   },
   "capacity": {
     "lines": [
@@ -77,7 +192,7 @@
         "id": "med-consultant",
         "name": "Consultant",
         "profession": "medical",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 1.0,
         "costPerWtePerYear": 110000,
@@ -85,13 +200,14 @@
         "endHour": 16.5,
         "dayPattern": "everyDay",
         "countsTowardsProfessionCapacity": true,
-        "active": true
+        "active": true,
+        "notes": "areaId null = floating: circulates across the whole floor. Re-tag to a specific area if a clinician only ever works there."
       },
       {
         "id": "med-long-day-registrar",
         "name": "Long Day Registrar",
         "profession": "medical",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 2,
         "patientsPerHour": 0.67,
         "costPerWtePerYear": 110000,
@@ -105,7 +221,7 @@
         "id": "med-long-day-gp",
         "name": "Long Day GP",
         "profession": "medical",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 0.5,
         "costPerWtePerYear": 110000,
@@ -113,13 +229,14 @@
         "endHour": 20,
         "dayPattern": "weekday",
         "countsTowardsProfessionCapacity": true,
-        "active": true
+        "active": true,
+        "notes": "Floating by default. If this GP only ever runs the hot clinics, re-tag the line to the hot-clinic area."
       },
       {
         "id": "med-twilight-imt",
         "name": "Twilight IMT",
         "profession": "medical",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 0.6,
         "costPerWtePerYear": 110000,
@@ -133,7 +250,7 @@
         "id": "med-sho",
         "name": "SHO (assumed rate)",
         "profession": "medical",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 3,
         "patientsPerHour": 0.5,
         "costPerWtePerYear": 110000,
@@ -148,7 +265,7 @@
         "id": "med-registrar-weekend",
         "name": "Registrar (weekend)",
         "profession": "medical",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 0.67,
         "costPerWtePerYear": 110000,
@@ -162,7 +279,7 @@
         "id": "med-sho-weekend",
         "name": "SHO (weekend)",
         "profession": "medical",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 0.5,
         "costPerWtePerYear": 110000,
@@ -176,7 +293,7 @@
         "id": "nur-b7-nic",
         "name": "B7 NIC (co-ordinator)",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
@@ -185,13 +302,13 @@
         "dayPattern": "everyDay",
         "countsTowardsProfessionCapacity": false,
         "active": true,
-        "notes": "Fixed co-ordinator role on the floor; does not carry patients, so it adds no nursing concurrency capacity (bay = false)."
+        "notes": "Floating floor-wide co-ordinator; does not hold patients, so it adds no holding capacity to any area."
       },
       {
         "id": "nur-b6-hello",
         "name": "B6 Hello Nurse",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
@@ -199,13 +316,14 @@
         "endHour": 20.5,
         "dayPattern": "everyDay",
         "countsTowardsProfessionCapacity": false,
-        "active": true
+        "active": true,
+        "notes": "Genuinely floor-wide - meets patients wherever they arrive - so deliberately left untagged rather than forced into an area."
       },
       {
         "id": "nur-b6-inreach",
         "name": "B6 In-reach Nurse",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
@@ -213,13 +331,14 @@
         "endHour": 20.5,
         "dayPattern": "everyDay",
         "countsTowardsProfessionCapacity": false,
-        "active": true
+        "active": true,
+        "notes": "Works into ED rather than in one SDEC area; left floating."
       },
       {
         "id": "nur-triage",
         "name": "Triage Nurse",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": null,
         "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
@@ -227,13 +346,14 @@
         "endHour": 20.5,
         "dayPattern": "weekday",
         "countsTowardsProfessionCapacity": false,
-        "active": true
+        "active": true,
+        "notes": "Left FLOATING rather than tagged to the Triage Room: triage is a floor-wide function that streams patients into every area. Tag it to the triage area if the room is genuinely staffed as a fixed post."
       },
       {
-        "id": "nur-bay-b6-nic",
-        "name": "Bay - B6 NIC",
+        "id": "nur-bay1-b6-nic",
+        "name": "Bay 1 - B6 NIC",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": "bay-1",
         "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
@@ -242,41 +362,73 @@
         "dayPattern": "weekday",
         "countsTowardsProfessionCapacity": true,
         "active": true,
-        "notes": "Bay line: carries patients and adds nursing concurrency capacity at patientsPerHour patients per nurse."
+        "notes": "PLACEHOLDER SPLIT of the v1 'Bay - B6 NIC' line (1 WTE). Holds patients, so contributes patientsPerHour patients of holding capacity per WTE to Bay 1, capped at Bay 1's physical spaces."
       },
       {
-        "id": "nur-bay-b5",
-        "name": "Bay - B5 nurses",
+        "id": "nur-bay1-b5",
+        "name": "Bay 1 - B5 nurse",
         "profession": "nursing",
-        "areaIds": ["sdec"],
-        "wte": 3,
+        "areaId": "bay-1",
+        "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
         "startHour": 8,
         "endHour": 20.5,
         "dayPattern": "weekday",
         "countsTowardsProfessionCapacity": true,
-        "active": true
+        "active": true,
+        "notes": "PLACEHOLDER SPLIT of the v1 'Bay - B5 nurses' line (3 WTE): 1 WTE to Bay 1, 2 WTE to Bay 2, giving each bay an even 2 WTE alongside the B6 NIC. Confirm the real bay-by-bay establishment."
       },
       {
-        "id": "nur-bay-weekend",
-        "name": "Bay nurses (weekend)",
+        "id": "nur-bay2-b5",
+        "name": "Bay 2 - B5 nurses",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": "bay-2",
         "wte": 2,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekday",
+        "countsTowardsProfessionCapacity": true,
+        "active": true,
+        "notes": "PLACEHOLDER SPLIT - see the Bay 1 B5 line."
+      },
+      {
+        "id": "nur-bay1-weekend",
+        "name": "Bay 1 - nurse (weekend)",
+        "profession": "nursing",
+        "areaId": "bay-1",
+        "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
         "startHour": 8,
         "endHour": 20.5,
         "dayPattern": "weekend",
         "countsTowardsProfessionCapacity": true,
-        "active": true
+        "active": true,
+        "notes": "PLACEHOLDER SPLIT of the v1 'Bay nurses (weekend)' line (2 WTE), one per bay."
+      },
+      {
+        "id": "nur-bay2-weekend",
+        "name": "Bay 2 - nurse (weekend)",
+        "profession": "nursing",
+        "areaId": "bay-2",
+        "wte": 1,
+        "patientsPerHour": 4,
+        "costPerWtePerYear": 42000,
+        "startHour": 8,
+        "endHour": 20.5,
+        "dayPattern": "weekend",
+        "countsTowardsProfessionCapacity": true,
+        "active": true,
+        "notes": "PLACEHOLDER SPLIT - see the Bay 1 weekend line."
       },
       {
         "id": "nur-emt-darting",
-        "name": "EMT (darting/float)",
+        "name": "EMT (darting)",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": "darting",
         "wte": 3,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
@@ -284,13 +436,14 @@
         "endHour": 20.5,
         "dayPattern": "weekday",
         "countsTowardsProfessionCapacity": false,
-        "active": true
+        "active": true,
+        "notes": "The v1 'EMT (darting/float)' line, tagged to the Darting Rooms. countsTowardsProfessionCapacity stays false, preserving the v1 treatment that EMTs add no nursing holding capacity."
       },
       {
         "id": "nur-emt-weekend",
-        "name": "EMT (weekend)",
+        "name": "EMT (weekend, darting)",
         "profession": "nursing",
-        "areaIds": ["sdec"],
+        "areaId": "darting",
         "wte": 1,
         "patientsPerHour": 4,
         "costPerWtePerYear": 42000,
@@ -298,7 +451,8 @@
         "endHour": 20.5,
         "dayPattern": "weekend",
         "countsTowardsProfessionCapacity": false,
-        "active": true
+        "active": true,
+        "notes": "Weekend EMT, tagged to Darting on the same basis as the weekday line."
       }
     ],
     "productivity": [
@@ -313,7 +467,7 @@
         "outOfDepartmentHours": 0,
         "aggregateHeadroom": 0.32,
         "productiveMinutesPerStaffHour": 45,
-        "notes": "PLACEHOLDER for schema consistency with the ED model. The source SDEC tool works off raw WTE x rate with no leave/sickness/headroom adjustment, so this section is NOT wired into the engine."
+        "notes": "PLACEHOLDER for schema consistency with the ED model. The model works off raw WTE x rate with no leave/sickness/headroom adjustment, so this section is NOT wired into the engine."
       },
       {
         "profession": "nursing",
@@ -328,7 +482,8 @@
         "productiveMinutesPerStaffHour": 48,
         "notes": "PLACEHOLDER - see the medical productivity note. Not wired into the engine."
       }
-    ]
+    ],
+    "notes": "capacity.lines are floor-wide rows, each tagged with an areaId (null = floating/unassigned). A line's patientsPerHour is the patients-seen-per-hour rate for medical grades and the patients-per-nurse holding figure for nursing lines that hold patients."
   },
   "standards": {
     "staffingRules": [],
@@ -346,6 +501,14 @@
       "oneoneone": 1,
       "hotClinic": 1
     },
+    "areaSpaceDeltas": {
+      "bay-1": 0,
+      "bay-2": 0,
+      "ambulatory-chairs": 0,
+      "hot-clinic": 0,
+      "darting": 0,
+      "triage": 0
+    },
     "customCapacityLines": {
       "medical": [],
       "nursing": []
@@ -357,7 +520,7 @@
         "type": "capacityAddition",
         "profession": "medical",
         "enabled": false,
-        "areaIds": ["sdec"],
+        "areaId": null,
         "note": "Senior decision-maker on the floor into the evening peak",
         "add": [
           {
@@ -376,7 +539,7 @@
         "type": "capacityAddition",
         "profession": "medical",
         "enabled": false,
-        "areaIds": ["sdec"],
+        "areaId": null,
         "note": "Covers the late arrivals tail so the queue clears before close",
         "add": [
           {
@@ -395,8 +558,8 @@
         "type": "capacityAddition",
         "profession": "nursing",
         "enabled": false,
-        "areaIds": ["sdec"],
-        "note": "One more registered nurse in the bays, 08:00-20:30",
+        "areaId": "bay-1",
+        "note": "One more registered nurse holding patients, 08:00-20:30 - targeted at Bay 1",
         "add": [
           {
             "label": "Extra bay nurse",
@@ -415,7 +578,7 @@
         "type": "capacityAddition",
         "profession": "medical",
         "enabled": false,
-        "areaIds": ["sdec"],
+        "areaId": null,
         "note": "Second weekend clinician to match weekday cover shape",
         "add": [
           {
@@ -427,8 +590,18 @@
             "dayPattern": "weekend"
           }
         ]
+      },
+      {
+        "id": "hot-clinic-room",
+        "name": "Open a Third Hot Clinic Room",
+        "type": "physicalSpaceAddition",
+        "profession": "none",
+        "enabled": false,
+        "areaId": "hot-clinic",
+        "note": "One more hot clinic room - physical space only, not costed here",
+        "addSpaces": 1
       }
     ],
-    "notes": "Future-state levers from the source tool. Each preset lever is a scheme with type 'capacityAddition' and its add[] lines; enable a scheme by setting enabled:true. The scalar dials (demandMultiplier, losMultiplier, c4cPercent, sourceMultipliers) rescale demand. NOTE the source's deliberate asymmetry: c4cPercent (Care Closer to Home diversion) reduces patients-present but NOT arrivals. An add line whose endHour equals 0 means midnight-as-overnight-wrap (e.g. Twilight doctor 14:00-00:00), matching the source's parsing of '00:00'. customCapacityLines carry the net change (wte - baseWte) of any pulled-in and edited baseline lines; empty in the seed."
+    "notes": "Future-state levers. A 'capacityAddition' scheme adds staffing lines, tagged to the scheme's areaId (null = floating). A 'physicalSpaceAddition' scheme adds addSpaces physical spaces to its area and carries no staffing cost - capital/estates cost is out of scope. areaSpaceDeltas is the ad-hoc equivalent: spaces added to (or removed from) an area in the future state. The scalar dials (demandMultiplier, losMultiplier, c4cPercent, sourceMultipliers) rescale demand; a per-source multiplier reaches an area in proportion to that area's own referral-source mix, so scaling hot clinics up scales the Hot Clinic Rooms and nothing else. NOTE the deliberate asymmetry carried over from the source tool: c4cPercent (Care Closer to Home diversion) reduces patients-present but NOT arrivals. An add line whose endHour equals 0 means midnight-as-overnight-wrap (e.g. Twilight doctor 14:00-00:00). customCapacityLines carry the net change (wte - baseWte) of any pulled-in and edited baseline lines; empty in the seed."
   }
 }
